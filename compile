@@ -1,0 +1,8 @@
+rm -f *.class
+javac -Xlint:all -cp '.;lib/*' $1.java
+
+if [ $? -eq 0 ]; then
+    java -cp '.;lib/*' $*
+fi
+
+rm -f *.class

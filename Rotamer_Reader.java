@@ -7,7 +7,7 @@ public class Rotamer_Reader
     public static void main(String[] args)
     {
 	List<String> list = new ArrayList<String>();
-	String filenameString = "asp.bbdep.rotamers.txt";
+	String filenameString = "rotamer_library/asp.bbdep.rotamers.txt";
 	System.out.println(System.getProperty("user.dir"));
 
 	Scanner thisFile = null;
@@ -33,7 +33,7 @@ public class Rotamer_Reader
 	for (String s: list)
 	    {
 		String[] parts = s.split(" ");
-		if(parts[0].compareTo("ASN") && Integer.getInteger(parts[1]) == phi && Integer.getInteger(parts[2]) == psi)
+		if (parts[0].equals("ASN") && Integer.getInteger(parts[1]) == phi && Integer.getInteger(parts[2]) == psi)
 		    {
 			System.out.println(parts[9]);
 		    }

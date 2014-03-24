@@ -8,7 +8,7 @@ public enum AminoAcid{
     public static List<Double> getRotamer(AminoAcid aminoAcid, double phi, double psi) {
 		
 	List<String> list = new ArrayList<String>();
-        String filenameString = aminoAcid.getName().toLowerCase() + ".bbdep.rotamers.lib";
+        String filenameString = "rotamer_library/" + aminoAcid.getName().toLowerCase() + ".bbdep.rotamers.lib";
         //System.out.println(System.getProperty("user.dir"));
 
 	//Read in entire file
