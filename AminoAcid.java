@@ -1,10 +1,52 @@
+// This class represents an amino acid.
+
 import java.util.*;
 import java.io.*;
-import java.lang.*;
+import com.google.common.collect.*;
 
-public enum AminoAcid{
-    Ala, Gly, Val, Leu, Ile, Pro, Phe, Tyr, Trp, Ser, Thr, Cys, Met, Asn, Gln, Lys, Arg, His, Asp, Glu;
+public enum AminoAcid
+{
+    // define all of the possible amino acids
+    ALA("Ala", "alanine",       true),
+    GLY("Gly", "glycine",       true),
+    VAL("Val", "valine",        true),
+    LEU("Leu", "leucine"        true),
+    ILE("Ile", "isoleucine"     true),
+    PRO("Pro", "proline",       true),
+    PHE("Phe", "phenylalanine", false),
+    TYR("Tyr", "tyrosine",      true),
+    TRP("Trp", "tryptophan",    false),
+    SER("Ser", "serine",        true),
+    THR("Thr", "threonine",     true),
+    CYS("Cys", "cysteine",      true),
+    MET("Met", "methionine",    true),
+    ASN("Asn", "aspargine",     false),
+    GLN("Gln", "glutamine",     false),
+    LYS("Lys", "lysine",        true),
+    ARG("Arg", "arginine",      false),
+    HIS("His", "histidine",     false),
+    ASP("Asp", "aspartate",     false),
+    GLU("Glu", "glutamate",     false);
 
+    // fields for each amino acid
+    private String shortName;                        // e.g. Ala
+    private String fullName;                         // e.g. alanine
+    private boolean rotameric;                       // false if the last sidechain torsion involves an sp2 atom
+
+    // enum constructor
+    AminoAcid(String shortName, String fullName, boolean rotameric)
+    {
+        this.fullName = fullName;
+        this.shortName = shortName;
+        this.rotameric = rotameric;
+    }
+
+    public String toString()
+    {
+        return shortName;
+    }
+    
+/*
     public static List<Double> getRotamer(AminoAcid aminoAcid, double phi, double psi) {
 		
 	List<String> list = new ArrayList<String>();
@@ -84,36 +126,12 @@ public enum AminoAcid{
 	//based on random chance return set of angles describing rotamer
 	return candidateRotamers.get(counter);
     }
-    public String getName(){
-	switch (this)
-	    {
-	    case Ala : return "Ala";
-	    case Gly : return "Gly";
-	    case Leu : return "Leu";
-	    case Val : return "Val";
-	    case Ile : return "Ile";
-	    case Pro : return "Pro";
-	    case Phe : return "Phe";
-	    case Tyr : return "Tyr";
-	    case Trp : return "Trp";
-	    case Ser : return "Ser";
-	    case Thr : return "Thr";
-	    case Cys : return "Cys";
-	    case Met : return "Met";
-	    case Asn : return "Asn";
-	    case Gln : return "Gln";
-	    case Lys : return "Lys";
-	    case Arg : return "Arg";
-	    case His : return "His";
-	    case Asp : return "Asp";
-	    case Glu : return "Glu";
-	    default : return "ERROR";
-	    }
+*/
+    
+    // for testing
+    public static void main(String[] args)
+    {
+        System.out.println("hello");
+	    //System.out.println(AminoAcid.getRotamer(AminoAcid.Gln, 120.0, 120.0));
     }
-    public static void main(String[] args) {
-	System.out.println(AminoAcid.getRotamer(AminoAcid.Gln, 120.0, 120.0));
-    }
-
-			   
-			   
 }
