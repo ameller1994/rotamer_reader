@@ -7,45 +7,52 @@ import com.google.common.collect.*;
 public enum AminoAcid
 {
     // define all of the possible amino acids
-    ALA("Ala", "alanine",       true),
-    GLY("Gly", "glycine",       true),
-    VAL("Val", "valine",        true),
-    LEU("Leu", "leucine"        true),
-    ILE("Ile", "isoleucine"     true),
-    PRO("Pro", "proline",       true),
-    PHE("Phe", "phenylalanine", false),
-    TYR("Tyr", "tyrosine",      true),
-    TRP("Trp", "tryptophan",    false),
-    SER("Ser", "serine",        true),
-    THR("Thr", "threonine",     true),
-    CYS("Cys", "cysteine",      true),
-    MET("Met", "methionine",    true),
-    ASN("Asn", "aspargine",     false),
-    GLN("Gln", "glutamine",     false),
-    LYS("Lys", "lysine",        true),
-    ARG("Arg", "arginine",      false),
-    HIS("His", "histidine",     false),
-    ASP("Asp", "aspartate",     false),
-    GLU("Glu", "glutamate",     false);
+    ALA("Ala", "alanine",       Rotameric.INVALID),
+    GLY("Gly", "glycine",       Rotameric.INVALID),
+    VAL("Val", "valine",        Rotameric.ROTAMER),
+    LEU("Leu", "leucine",        Rotameric.ROTAMER),
+    ILE("Ile", "isoleucine",     Rotameric.ROTAMER),
+    PRO("Pro", "proline",       Rotameric.NONROTAMER),
+    PHE("Phe", "phenylalanine", Rotameric.ROTAMER),
+    TYR("Tyr", "tyrosine",      Rotameric.ROTAMER),
+    TRP("Trp", "tryptophan",    Rotameric.NONROTAMER),
+    SER("Ser", "serine",        Rotameric.ROTAMER),
+    THR("Thr", "threonine",     Rotameric.ROTAMER),
+    CYS("Cys", "cysteine",      Rotameric.ROTAMER),
+    MET("Met", "methionine",    Rotameric.ROTAMER),
+    ASN("Asn", "aspargine",     Rotameric.NONROTAMER),
+    GLN("Gln", "glutamine",     Rotameric.NONROTAMER),
+    LYS("Lys", "lysine",        Rotameric.ROTAMER),
+    ARG("Arg", "arginine",      Rotameric.NONROTAMER),
+    HIS("His", "histidine",     Rotameric.NONROTAMER),
+    ASP("Asp", "aspartate",     Rotameric.NONROTAMER),
+    GLU("Glu", "glutamate",     Rotameric.NONROTAMER);
 
     // fields for each amino acid
     private String shortName;                        // e.g. Ala
     private String fullName;                         // e.g. alanine
-    private boolean rotameric;                       // false if the last sidechain torsion involves an sp2 atom
+    private Rotameric rotameric;                       // false if the last sidechain torsion involves an sp2 atom
+    private SideChainRotamerLibrary library = null;
 
     // enum constructor
-    AminoAcid(String shortName, String fullName, boolean rotameric)
+    AminoAcid(String shortName, String fullName, Rotameric rotameric)
     {
         this.fullName = fullName;
         this.shortName = shortName;
         this.rotameric = rotameric;
+	//call constructor of side chain rotamer library
     }
 
     public String toString()
     {
         return shortName;
     }
-    
+    /*
+    public List<Double> drawRandomRotamer()
+    {
+	return  
+	    }
+    */
 /*
     public static List<Double> getRotamer(AminoAcid aminoAcid, double phi, double psi) {
 		
@@ -127,7 +134,7 @@ public enum AminoAcid
 	return candidateRotamers.get(counter);
     }
 */
-    
+					  
     // for testing
     public static void main(String[] args)
     {
