@@ -22,6 +22,10 @@ public class RotamericLibrary extends SideChainRotamerLibrary {
 
         try {
             thisFile = new Scanner(new FileReader(filenameString));
+	    
+	    double currPhi = 0.0;
+	    double currPsi = 0.0;
+
             while (thisFile.hasNextLine())
                 {
                     String currentLine = thisFile.nextLine();
@@ -36,7 +40,18 @@ public class RotamericLibrary extends SideChainRotamerLibrary {
 		    if(parts.get(0).equals(aminoAcid.getName().toUpperCase())
 		       {
 			   //create BackBone angles with parts.get(1) and parts.get(2)
+			   double nextPhi = parts.get(1);
+			   double nextPsi = parts.get(2);
 			   
+			   if (currPsi == nextPsi && currPhi == nextPhi) {
+			       //add to temporary list of list of chis and probabilites
+			       
+			   }
+			   else {
+			       //create new linked hash map entry
+			       
+			       
+			   }
 			   //put new entry into Linked Hash Map for those BackBone angles
 			   //create DiscreteProbabilityDataSet object
 			   //Chi values are in columns 9, 10, 11, 12 and probability is in column 8
