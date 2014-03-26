@@ -23,7 +23,7 @@ public class RotamericLibrary extends SideChainRotamerLibrary
 
         //Read in entire file
         Scanner thisFile = null;
-	dataset = new LinkedHashMap<BackBoneAngles,DiscreteProbabiltiyDistribution>(); 
+	    dataset = new LinkedHashMap<BackBoneAngles,DiscreteProbabiltiyDistribution>(); 
 	    
         try {
             thisFile = new Scanner(new FileReader(filenameString));

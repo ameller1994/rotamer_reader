@@ -28,8 +28,8 @@ public enum AminoAcid
     VAL("Val",      "valine",        RotamerType.IS_ROTAMERIC),
     LEU("Leu",      "leucine",       RotamerType.IS_ROTAMERIC),
     ILE("Ile",      "isoleucine",    RotamerType.IS_ROTAMERIC),
-    PRO("Cpr",      "cis-proline",   RotamerType.IS_ROTAMERIC),
-    PRO("Tpr",      "trans-proline", RotamerType.IS_ROTAMERIC),
+    CPR("Cpr",      "cis-proline",   RotamerType.IS_ROTAMERIC),
+    TPR("Tpr",      "trans-proline", RotamerType.IS_ROTAMERIC),
     PHE("Phe",      "phenylalanine", RotamerType.IS_ROTAMERIC),
     TYR("Tyr",      "tyrosine",      RotamerType.IS_ROTAMERIC),
     TRP("Trp",      "tryptophan",    RotamerType.NON_ROTAMERIC),
@@ -39,7 +39,7 @@ public enum AminoAcid
     MET("Met",      "methionine",    RotamerType.IS_ROTAMERIC),
     ASN("Asn",      "aspargine",     RotamerType.NON_ROTAMERIC),
     GLN("Gln",      "glutamine",     RotamerType.NON_ROTAMERIC),
-    LYS("Lys",      "lysine",        RotamerType.IS_ROTAMER),
+    LYS("Lys",      "lysine",        RotamerType.IS_ROTAMERIC),
     ARG("Arg",      "arginine",      RotamerType.NON_ROTAMERIC),
     HIS("His",      "histidine",     RotamerType.NON_ROTAMERIC),
     ASP("Asp",      "aspartate",     RotamerType.NON_ROTAMERIC),
@@ -80,11 +80,11 @@ public enum AminoAcid
         this.rotamerType = rotamerType;
 
         // determine filename
-        if ( rotamerType == IS_ROTAMERIC )
+        if ( rotamerType == RotamerType.IS_ROTAMERIC )
             filename = Settings.ROTAMER_LIBRARY_DIRECTORY + shortName.toLowerCase() + ".bbdep.rotamers.lib";
-        else if ( rotamerType == NON_ROTAMERIC )
+        else if ( rotamerType == RotamerType.NON_ROTAMERIC )
             filename = Settings.ROTAMER_LIBRARY_DIRECTORY + shortName.toLowerCase() + ".bbdep.densities.lib";
-        else if ( rotamerType == HAS_NO_ROTAMERS )
+        else if ( rotamerType == RotamerType.HAS_NO_ROTAMERS )
             filename = "";
         else
             throw new IllegalArgumentException("Unrecognized RotamerType in AminoAcid constructor!");
