@@ -5,23 +5,23 @@ import java.util.*;
  */
 public abstract class SideChainRotamerLibrary {
     
-    public SideChainRotamerLibrary(String fileName)
-    {
-	    List<String> list = new ArrayList<String>();
-        String filenameString = "rotamer_library/" + fileName;
-        //System.out.println(System.getProperty("user.dir"));
+    abstract DiscreteProbabilityDistribution get(Double psi, Double phi);
 
-        //Read in entire file
-        Scanner thisFile = null;
-        try {
-            thisFile = new Scanner(new FileReader(filenameString));
-            while (thisFile.hasNextLine())
-                {
-                    String currentLine = thisFile.nextLine();
-                    list.add(currentLine);
-                }
-        }
-        catch(IOException ioe) {
-            ioe.printStackTrace();
-    }
+    class BackboneAngles {
+	
+	private final Pair<Double,Double> bba;
+	
+	public BackboneAngles(Double psi, Double phi) {
+	    bba = new Pair<Double,Double>(psi,phi);
+	}
+	
+	public Double getPsi(){
+	    return Pair.getFirst();
+	}
+	
+	public Double getPhi(){
+	    return Pair.getSecond();
+	}
+    }   
+       
 }

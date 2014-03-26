@@ -73,7 +73,7 @@ public enum AminoAcid
     private SideChainRotamerLibrary library;
 
     // enum constructor
-    AminoAcid(String shortName, String fullName, String filename, RotamerType rotamerType)
+    AminoAcid(String shortName, String fullName, RotamerType rotamerType)
     {
         this.fullName = fullName;
         this.shortName = shortName;
@@ -103,6 +103,15 @@ public enum AminoAcid
     }
 
     /**
+     * Retuns the filename associated with an amino acid
+     * @return the String containing the filename
+     */
+    public String getFilename()
+    {
+	return filename;
+    }
+
+    /**
      * Indicates whether the amino acid can be represented by standard rotamers,
      * is non-rotameric, or contains no rotatable bonds at all.  For a full description,
      * see the <a href="http://dunbrack.fccc.edu/bbdep2010/">Dunbrack backbone-dependent
@@ -129,9 +138,11 @@ public enum AminoAcid
 
     /**
      * Gives a random set of sidechain torsion angles for this amino acid.
+     * @param psi, the backbone angle
+     * @param phi, the backbone angle
      * @return the torsion angles X1, X2, ... as an ordered list in degrees
      */
-    public List<Double> getRandomRotamer()
+    public List<Double> getRandomRotamer(Double psi, Double phi)
     {
 	    return new LinkedList<Double>();
 	}
