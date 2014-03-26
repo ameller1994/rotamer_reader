@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.concurrent.*;
 import com.google.common.collect.*;
 
 /**
@@ -55,9 +56,7 @@ public class DiscreteProbabilityDistribution<E>
         // initialize arrays
         probability = new double[probabilities.size()];
         alias = new int[probabilities.size()];
-        this.outcomes = new E[probabilities.size()];
-        for (int i=0; i < probabilities.size(); i++)
-            this.outcomes[i] = outcomes.get(i);
+        this.outcomes = ImmutableList.copyOf(outcomes);
         
         // normalize probabilities and make a copy of the probabilities list, since we will be changing it
         for (int i=0; i < probabilities.size(); i++)
@@ -140,7 +139,7 @@ public class DiscreteProbabilityDistribution<E>
         int result = coinToss ? column : alias[column];
 
         // return the corresponding result object
-        return alias[result];
+        return outcomes.get(result);
     }
 
     @Override
@@ -172,12 +171,12 @@ public class DiscreteProbabilityDistribution<E>
         probabilities.add(1.0);
         probabilities.add(1.0);
 
-        DiscreteProbabilityDistribution dist = new DiscreteProbabilityDistribution(outcomes,probabilities);
+        DiscreteProbabilityDistribution<String> dist = new DiscreteProbabilityDistribution<>(outcomes,probabilities);
         LinkedHashMap<String,Integer> results = new LinkedHashMap<>();
         for (String s : outcomes)
             results.put(s, 0);
         System.out.println("Rolling...");
-        for (int i=0; i < 100000; i++)
+        for (int i=0; i < 600000; i++)
             {
                 String thisOutcome = dist.getRandom();
                 Integer numberOfHits = results.get(thisOutcome);
