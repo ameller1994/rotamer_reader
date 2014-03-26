@@ -11,7 +11,7 @@ import com.google.common.collect.*;
  * example, the outcome might be a list of torsion angles.  This class is
  * immutable.
  *
- * Algorithm copied from http://www.keithschwarz.com/darts-dice-coins/
+ * Algorithm copied from <a href="http://www.keithschwarz.com/darts-dice-coins/">here</a>.
  *
  */
 public class DiscreteProbabilityDistribution<E>
@@ -52,16 +52,16 @@ public class DiscreteProbabilityDistribution<E>
                     throw new IllegalArgumentException("Cannot have a negative probability!");
                 sum += d;
             }
-
+        
         // initialize arrays
         probability = new double[probabilities.size()];
         alias = new int[probabilities.size()];
         this.outcomes = ImmutableList.copyOf(outcomes);
         
         // normalize probabilities and make a copy of the probabilities list, since we will be changing it
+        probabilities = new ArrayList<Double>(probabilities);
         for (int i=0; i < probabilities.size(); i++)
             probabilities.set(i, probabilities.get(i) / sum);
-        probabilities = new ArrayList<Double>(probabilities);
 
         // calculate average probability
         final double average = 1.0 / probabilities.size();
@@ -142,14 +142,62 @@ public class DiscreteProbabilityDistribution<E>
         return outcomes.get(result);
     }
 
+    /**
+     * Returns a short description of this distribution:
+     * [outcome, adjusted probability]
+     * Note that this is not the actual or normalized probability!
+     * To see that, you will have to print out the probabilities array in the
+     * constructor.  (We throw that way afterwards.)
+     * @return the list [outcome, adjusted probability]
+     */
     @Override
     public String toString()
     {
-        return "";
+        String returnString = "";
+        for (int i=0; i < probability.length; i++)
+            {
+                E outcome = outcomes.get(i);
+                double prob = probability[i];
+                returnString = returnString + String.format("[%s, %.2f]", outcome.toString(), 100.0 * prob);
+                if ( i < probability.length - 1 )
+                    returnString = returnString + "\n";
+            }
+        return returnString;
     }
 
-    // hashCode
+    /**
+     * Returns the hash code for this distribution.
+     * @return the hash code for this distribution
+     */
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(probability,outcomes,alias);
+    }
+
     // equals
+    /**
+     * Returns true if this DiscreteProbabilityDistribution is identical to another
+     * distribution.  Uses Arrays.equals().
+     * @return true if equal
+     */
+    @Override
+    public boolean equals(Object obj)
+    {
+        if ( obj == null )
+            return false;
+        if ( obj == this )
+            return true;
+        if ( !(obj instanceof DiscreteProbabilityDistribution) )
+            return false;
+
+        DiscreteProbabilityDistribution<?> dist = (DiscreteProbabilityDistribution<?>)obj;
+        if ( ! Arrays.equals(dist.probability, probability) ||
+             ! dist.outcomes.equals(outcomes) ||
+             ! Arrays.equals(dist.alias, alias) )
+            return false;
+        return true;
+    }
 
     /**
      * Tester class.
@@ -175,6 +223,7 @@ public class DiscreteProbabilityDistribution<E>
         LinkedHashMap<String,Integer> results = new LinkedHashMap<>();
         for (String s : outcomes)
             results.put(s, 0);
+        System.out.println(dist);
         System.out.println("Rolling...");
         for (int i=0; i < 600000; i++)
             {
