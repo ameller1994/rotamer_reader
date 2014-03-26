@@ -73,7 +73,7 @@ public enum AminoAcid
     private SideChainRotamerLibrary library;
 
     // enum constructor
-    AminoAcid(String shortName, String fullName, String filename, RotamerType rotamerType)
+    AminoAcid(String shortName, String fullName, RotamerType rotamerType)
     {
         this.fullName = fullName;
         this.shortName = shortName;
