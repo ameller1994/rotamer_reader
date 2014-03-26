@@ -4,45 +4,98 @@ import java.util.*;
 import java.io.*;
 import com.google.common.collect.*;
 
+/**
+ * Represents the standard amino acids with different categories
+ * for cis and trans proline.  Backbone-dependent rotamer data is read
+ * from the Dunbrack library.  We use traditional rotamers for amino acids
+ * containing all sp3-sp3 bonds in their sidechains.  That is, we use ordered
+ * tuples (X1, X2, ..., Xn) to represent the backbone torsion angles, where n
+ * is the number of sidechain torsions.  (OHs are not counted in the number of
+ * torsions.  We use a combination of an ordered tuple and a
+ * DiscreteProbabilityDistribution to represent the non-rotameric amino acids.
+ * These amino acids contain an sp3-sp2 torsion at the end (e.g., phenylalanine).
+ * That is, we use an ordered tuple (X1, X2, ..., Xn-1) to represent the standard
+ * rotamer part of the sidechain and then a probability distribution to represent
+ * the terminal torsion.  Some amino acids do not contain any rotable bonds (e.g.
+ * glycine) and therefore do not have associated library data.
+ */
 public enum AminoAcid
 {
-    // define all of the possible amino acids
-    ALA("Ala", "alanine",       Rotameric.INVALID),
-    GLY("Gly", "glycine",       Rotameric.INVALID),
-    VAL("Val", "valine",        Rotameric.ROTAMER),
-    LEU("Leu", "leucine",        Rotameric.ROTAMER),
-    ILE("Ile", "isoleucine",     Rotameric.ROTAMER),
-    PRO("Pro", "proline",       Rotameric.NONROTAMER),
-    PHE("Phe", "phenylalanine", Rotameric.ROTAMER),
-    TYR("Tyr", "tyrosine",      Rotameric.ROTAMER),
-    TRP("Trp", "tryptophan",    Rotameric.NONROTAMER),
-    SER("Ser", "serine",        Rotameric.ROTAMER),
-    THR("Thr", "threonine",     Rotameric.ROTAMER),
-    CYS("Cys", "cysteine",      Rotameric.ROTAMER),
-    MET("Met", "methionine",    Rotameric.ROTAMER),
-    ASN("Asn", "aspargine",     Rotameric.NONROTAMER),
-    GLN("Gln", "glutamine",     Rotameric.NONROTAMER),
-    LYS("Lys", "lysine",        Rotameric.ROTAMER),
-    ARG("Arg", "arginine",      Rotameric.NONROTAMER),
-    HIS("His", "histidine",     Rotameric.NONROTAMER),
-    ASP("Asp", "aspartate",     Rotameric.NONROTAMER),
-    GLU("Glu", "glutamate",     Rotameric.NONROTAMER);
+    // enum constants
+    ALA("Ala",      "alanine",       RotamerType.HAS_NO_ROTAMERS),
+    GLY("Gly",      "glycine",       RotamerType.HAS_NO_ROTAMERS),
+    VAL("Val",      "valine",        RotamerType.IS_ROTAMERIC),
+    LEU("Leu",      "leucine",       RotamerType.IS_ROTAMERIC),
+    ILE("Ile",      "isoleucine",    RotamerType.IS_ROTAMERIC),
+    PRO("Cpr",      "cis-proline",   RotamerType.IS_ROTAMERIC),
+    PRO("Tpr",      "trans-proline", RotamerType.IS_ROTAMERIC),
+    PHE("Phe",      "phenylalanine", RotamerType.IS_ROTAMERIC),
+    TYR("Tyr",      "tyrosine",      RotamerType.IS_ROTAMERIC),
+    TRP("Trp",      "tryptophan",    RotamerType.NON_ROTAMERIC),
+    SER("Ser",      "serine",        RotamerType.IS_ROTAMERIC),
+    THR("Thr",      "threonine",     RotamerType.IS_ROTAMERIC),
+    CYS("Cys",      "cysteine",      RotamerType.IS_ROTAMERIC),
+    MET("Met",      "methionine",    RotamerType.IS_ROTAMERIC),
+    ASN("Asn",      "aspargine",     RotamerType.NON_ROTAMERIC),
+    GLN("Gln",      "glutamine",     RotamerType.NON_ROTAMERIC),
+    LYS("Lys",      "lysine",        RotamerType.IS_ROTAMER),
+    ARG("Arg",      "arginine",      RotamerType.NON_ROTAMERIC),
+    HIS("His",      "histidine",     RotamerType.NON_ROTAMERIC),
+    ASP("Asp",      "aspartate",     RotamerType.NON_ROTAMERIC),
+    GLU("Glu",      "glutamate",     RotamerType.NON_ROTAMERIC);
 
-    // fields for each amino acid
-    private String shortName;                        // e.g. Ala
-    private String fullName;                         // e.g. alanine
-    private Rotameric rotameric;                       // false if the last sidechain torsion involves an sp2 atom
-    private SideChainRotamerLibrary library = null;
+    // fields
+
+    /**
+     * An abbreviation like "Ala".
+     */
+    private String shortName;
+
+    /**
+     * A full name like "alanine".
+     */
+    private String fullName;
+
+    /**
+     * Indicates the kinds of sidechain torsions present.
+     */
+    private RotamerType rotamerType;
+
+    /**
+     * The filename containing the data for this residue.
+     */
+    private String filename;
+
+    /**
+     * Contains the rotamer library data for this amino acid.
+     */
+    private SideChainRotamerLibrary library;
 
     // enum constructor
-    AminoAcid(String shortName, String fullName, Rotameric rotameric)
+    AminoAcid(String shortName, String fullName, String filename, RotamerType rotamerType)
     {
         this.fullName = fullName;
         this.shortName = shortName;
-        this.rotameric = rotameric;
-	//call constructor of side chain rotamer library
+        this.rotamerType = rotamerType;
+
+        // determine filename
+        if ( rotamerType == IS_ROTAMERIC )
+            filename = Settings.ROTAMER_LIBRARY_DIRECTORY + shortName.toLowerCase() + ".bbdep.rotamers.lib";
+        else if ( rotamerType == NON_ROTAMERIC )
+            filename = Settings.ROTAMER_LIBRARY_DIRECTORY + shortName.toLowerCase() + ".bbdep.densities.lib";
+        else if ( rotamerType == HAS_NO_ROTAMERS )
+            filename = "";
+        else
+            throw new IllegalArgumentException("Unrecognized RotamerType in AminoAcid constructor!");
+
+	    //call constructor of side chain rotamer library
     }
 
+    /**
+     * Returns a brief description of this amino acid.
+     * @return the textual description of this amino acid
+     */
+    @Override
     public String toString()
     {
         return shortName;
@@ -54,13 +107,13 @@ public enum AminoAcid
      * see the <a href="http://dunbrack.fccc.edu/bbdep2010/">Dunbrack backbone-dependent
      *   rotamer library</a> page.
      */
-    public enum Rotameric
+    public enum RotamerType
     {
         /**
          * Represents an amino acid that has standard rotameric degrees of freedom.
          * That is, all sidechain torsions involves sp3-sp3 bonds.
          */
-        ROTAMERIC,
+        IS_ROTAMERIC,
 
         /**
          * Represents an amino acid that contains a terminal sp2-sp3 torsion.
@@ -70,15 +123,17 @@ public enum AminoAcid
         /**
          * Represents an amino acid that does not have sidechain torsions.
          */
-        INVALID;
+        HAS_NO_ROTAMERS;
     }
 
-    /*
-    public List<Double> drawRandomRotamer()
+    /**
+     * Gives a random set of sidechain torsion angles for this amino acid.
+     * @return the torsion angles X1, X2, ... as an ordered list in degrees
+     */
+    public List<Double> getRandomRotamer()
     {
-	return  
-	    }
-    */
+	    return new LinkedList<Double>();
+	}
 /*
     public static List<Double> getRotamer(AminoAcid aminoAcid, double phi, double psi) {
 		
