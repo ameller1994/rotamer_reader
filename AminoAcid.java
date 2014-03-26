@@ -47,6 +47,32 @@ public enum AminoAcid
     {
         return shortName;
     }
+
+    /**
+     * Indicates whether the amino acid can be represented by standard rotamers,
+     * is non-rotameric, or contains no rotatable bonds at all.  For a full description,
+     * see the <a href="http://dunbrack.fccc.edu/bbdep2010/">Dunbrack backbone-dependent
+     *   rotamer library</a> page.
+     */
+    public enum Rotameric
+    {
+        /**
+         * Represents an amino acid that has standard rotameric degrees of freedom.
+         * That is, all sidechain torsions involves sp3-sp3 bonds.
+         */
+        ROTAMERIC,
+
+        /**
+         * Represents an amino acid that contains a terminal sp2-sp3 torsion.
+         */
+        NON_ROTAMERIC,
+
+        /**
+         * Represents an amino acid that does not have sidechain torsions.
+         */
+        INVALID;
+    }
+
     /*
     public List<Double> drawRandomRotamer()
     {
