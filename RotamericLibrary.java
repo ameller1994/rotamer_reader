@@ -1,10 +1,11 @@
 import java.util.*;
 import java.lang.*;
 
-public class RotamericLibrary extends SideChainRotamerLibrary {
+public class RotamericLibrary extends SideChainRotamerLibrary
+{
     
     //data storage is accomplished using linked hash map from back bone angles to each rotamer (list of chis) 
-    LinkedHashMap<BackBoneAngles, DiscreteProbabilityDistribution> dataset; 
+    LinkedHashMap<BackboneAngles, DiscreteProbabilityDistribution> dataset; 
     
     public RotamericLibrary(AminoAcid aminoAcid)
     {
@@ -18,7 +19,7 @@ public class RotamericLibrary extends SideChainRotamerLibrary {
 
         //Read in entire file
         Scanner thisFile = null;
-	dataset = new  new LinkedHashMap<BackBoneAngles,DiscreteProbabiltiyDistribution>(); 
+	    dataset = new LinkedHashMap<BackBoneAngles,DiscreteProbabiltiyDistribution>(); 
 
         try {
             thisFile = new Scanner(new FileReader(filenameString));
@@ -37,7 +38,7 @@ public class RotamericLibrary extends SideChainRotamerLibrary {
 			parts.add(st.nextToken());
 		    
 		    //check to see if first entry is an amino acid name
-		    if(parts.get(0).equals(aminoAcid.getName().toUpperCase())
+		    if (parts.get(0).equals(aminoAcid.getName().toUpperCase()))
 		       {
 			   //create BackBone angles with parts.get(1) and parts.get(2)
 			   double nextPhi = parts.get(1);
@@ -56,16 +57,20 @@ public class RotamericLibrary extends SideChainRotamerLibrary {
 			   //create DiscreteProbabilityDataSet object
 			   //Chi values are in columns 9, 10, 11, 12 and probability is in column 8
                 }
-        }
-        catch(IOException ioe) {
-            ioe.printStackTrace();
-        }
+                }
+            }
+        catch (IOException e)
+            {
+                e.printStackTrace();
+                System.exit(1);
+            }
 
         
     }
 
     public DiscreteProbabilityDistribution map(Double psi, Double phi)
     {
+        return null;
 	//return discrete probability distribution for psi and phi
 	//allows user to then get random rotamer from that discrete probability distribution
     }

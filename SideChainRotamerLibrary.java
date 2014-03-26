@@ -1,9 +1,13 @@
+import java.util.*;
 
-public class SideChainRotamerLibrary {
+/**
+ * Represents backbone-dependent rotamer data for an amino acid.
+ */
+public abstract class SideChainRotamerLibrary {
     
     public SideChainRotamerLibrary(String fileName)
     {
-	List<String> list = new ArrayList<String>();
+	    List<String> list = new ArrayList<String>();
         String filenameString = "rotamer_library/" + fileName;
         //System.out.println(System.getProperty("user.dir"));
 
@@ -19,9 +23,5 @@ public class SideChainRotamerLibrary {
         }
         catch(IOException ioe) {
             ioe.printStackTrace();
-        }
-
-        
-
     }
 }

@@ -1,1 +1,1 @@
-javadoc *.java -d javadoc
+javadoc *.java -classpath '.;lib/*' -d javadoc

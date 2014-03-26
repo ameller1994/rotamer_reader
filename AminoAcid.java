@@ -9,12 +9,13 @@ import com.google.common.collect.*;
  * for cis and trans proline.  Backbone-dependent rotamer data is read
  * from the Dunbrack library.  We use traditional rotamers for amino acids
  * containing all sp3-sp3 bonds in their sidechains.  That is, we use ordered
- * tuples (X1, X2, ..., Xn) to represent the backbone torsion angles, where n
- * is the number of sidechain torsions.  (OHs are not counted in the number of
- * torsions.  We use a combination of an ordered tuple and a
- * DiscreteProbabilityDistribution to represent the non-rotameric amino acids.
- * These amino acids contain an sp3-sp2 torsion at the end (e.g., phenylalanine).
- * That is, we use an ordered tuple (X1, X2, ..., Xn-1) to represent the standard
+ * tuples (X<sub>1</sub>, X<sub>2</sub>, ..., X<sub>n</sub>) to represent the
+ * backbone torsion angles, where n is the number of sidechain torsions.  (OHs
+ * are not counted in the number of torsions.  We use a combination of an ordered
+ * tuple and a DiscreteProbabilityDistribution to represent the non-rotameric
+ * amino acids.  These amino acids contain an sp<sup>3</sup>-sp<sup>2</sup>
+ * torsion at the end (e.g., phenylalanine). That is, we use an ordered tuple
+ * (X<sub>1</sub>, X<sub>2</sub>, ..., X<sub>n-1</sub>) to represent the standard
  * rotamer part of the sidechain and then a probability distribution to represent
  * the terminal torsion.  Some amino acids do not contain any rotable bonds (e.g.
  * glycine) and therefore do not have associated library data.

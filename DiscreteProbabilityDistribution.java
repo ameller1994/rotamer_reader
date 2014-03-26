@@ -17,7 +17,13 @@ public class DiscreteProbabilityDistribution<E>
      * Contains the discrete probability distribution itself.  Maps each
      * outcome to a probability in the range 0.0 - 1.0.
      */
-    private final Map<E, Double> distribution;
+    private final double[] probability;
+    
+    /** The outcomes, mapped 1:1 with the probability array. */
+    private final E[] outcomes;
+
+    /** The alias table. */
+    private final int[] alias;
 
     /**
      * Populates the distribution and verifies invariants.  Lists must be
@@ -25,9 +31,18 @@ public class DiscreteProbabilityDistribution<E>
      * @param outcomes possible outcomes
      * @param probabilities probability of each outcome
     */
-    public DiscreteProbabilityDistribution(List<E> outcomes, List<Double> probabilites)
+    public DiscreteProbabilityDistribution(List<E> outcomes, List<Double> probabilities)
     {
-        // check invariants	
+        // check for nulls
+
+        // check invariants
+
+        // populate arrays
+        probability = probabilities.toArray();
+        outcomes = outcomes.toArray();
+
+        // populate alias table
+        
     }
 
     /**
@@ -36,6 +51,7 @@ public class DiscreteProbabilityDistribution<E>
      */
     public E getRandom()
     {
+        // draw a thread-safe random number
+        double randomNumber = ThreadLocalRandom.current().nextdouble();
     }
-	
 }

@@ -1,5 +1,6 @@
 
-public class NonRotamericLibrary extends SideChainRotmaerLibrary {
+public class NonRotamericLibrary extends SideChainRotamerLibrary
+{
     
     //dataset representing library
 
@@ -15,3 +16,4 @@ public class NonRotamericLibrary extends SideChainRotmaerLibrary {
 	//returns DiscreteProbabilityDistribution with outcome of list of chis (rotameric part) and a DiscreteProbabilityDistribution for the last chi
 
     }
+}
