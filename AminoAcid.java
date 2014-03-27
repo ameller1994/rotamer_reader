@@ -139,95 +139,14 @@ public enum AminoAcid
 
     /**
      * Gives a random set of sidechain torsion angles for this amino acid.
-     * @param psi, the backbone angle
-     * @param phi, the backbone angle
+     * @param psi the backbone angle
+     * @param phi the backbone angle
      * @return the torsion angles X1, X2, ... as an ordered list in degrees
      */
     public List<Double> getRandomRotamer(Double psi, Double phi)
     {
 	    return new LinkedList<Double>();
 	}
-/*
-    public static List<Double> getRotamer(AminoAcid aminoAcid, double phi, double psi) {
-		
-	List<String> list = new ArrayList<String>();
-        String filenameString = "rotamer_library/" + aminoAcid.getName().toLowerCase() + ".bbdep.rotamers.lib";
-        //System.out.println(System.getProperty("user.dir"));
-
-	//Read in entire file
-        Scanner thisFile = null;
-        try {
-            thisFile = new Scanner(new FileReader(filenameString));
-            while (thisFile.hasNextLine())
-                {
-                    String currentLine = thisFile.nextLine();
-                    list.add(currentLine);
-                }
-	}
-        catch(IOException ioe) {
-            ioe.printStackTrace();
-        }
-
-	List<List<Double>> candidateRotamers = new ArrayList<List<Double>>();
-	//List<Double> probabilities = new ArrayList<Double>();
-	
-	//Create a rolling sum of the probabilities so that each rotamer has a probability of being returned corresponding to its probability
-	List<Double> probSums = new ArrayList<Double>();
-	
-	double sum = 0.0;
-
-        for (String s: list)
-            {
-		
-		List<String> parts = new ArrayList<String>();
-		
-		
-		StringTokenizer st = new StringTokenizer(s, " ", false);
-		while(st.hasMoreTokens())
-		    parts.add(st.nextToken());
-		    
-
-
-		if(parts.get(0).equals(aminoAcid.getName().toUpperCase()) && Double.parseDouble(parts.get(1)) == phi && Double.parseDouble(parts.get(2)) == psi)
-                    {
-			List<Double> rotamer = new ArrayList<Double>();
-
-                        //System.out.println(Double.parseDouble(parts.get(9)));
-			rotamer.add(Double.parseDouble(parts.get(9)));
-			rotamer.add(Double.parseDouble(parts.get(10)));
-			rotamer.add(Double.parseDouble(parts.get(11)));
-			rotamer.add(Double.parseDouble(parts.get(12)));
-			
-			candidateRotamers.add(rotamer);
-			sum = sum + Double.parseDouble(parts.get(8));
-			probSums.add(sum);
-
-			//probabilities.add(Double.parseDouble(parts.get(8)));
-                    }
-            }
-	
-	//System.out.println(sum);
-
-	double rand = Math.random();
-	System.out.println(rand);
-	
-	double curr = probSums.get(0);
-	int counter = 0; 
-
-	//Loop through probSums until you fall within range with rand
-	while (rand > curr)
-	    {
-		counter++;
-		curr = probSums.get(counter);
-		
-	    }
-	System.out.println(probSums.get(counter));
-	System.out.println(probSums.get(counter+1));
-
-	//based on random chance return set of angles describing rotamer
-	return candidateRotamers.get(counter);
-    }
-*/
 					  
     // for testing
     public static void main(String[] args)

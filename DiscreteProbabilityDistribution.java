@@ -30,6 +30,12 @@ public class DiscreteProbabilityDistribution<E>
     private final int[] alias;
 
     /**
+     * Keep a list of the initial probabilities.  We can remove this
+     * when we go to production.
+    */
+    private final List<Double> inputProbabilities;
+
+    /**
      * Populates the distribution and verifies invariants.  Lists must be
      * the same size and the sum of the probabilities must equal 1.
      * @param outcomes possible outcomes
@@ -58,7 +64,8 @@ public class DiscreteProbabilityDistribution<E>
         probability = new double[probabilities.size()];
         alias = new int[probabilities.size()];
         this.outcomes = ImmutableList.copyOf(outcomes);
-        
+        inputProbabilities = ImmutableList.copyOf(probabilities);
+
         // normalize probabilities and make a copy of the probabilities list, since we will be changing it
         probabilities = new ArrayList<Double>(probabilities);
         for (int i=0; i < probabilities.size(); i++)
@@ -149,6 +156,8 @@ public class DiscreteProbabilityDistribution<E>
      * Note that this is not the actual or normalized probability!
      * To see that, you will have to print out the probabilities array in the
      * constructor.  (We throw that way afterwards.)
+     * EDIT: I added back the original probabilities.  We should throw this
+     * away in production to save memory.
      * @return the list [outcome, adjusted probability]
      */
     @Override
@@ -158,7 +167,8 @@ public class DiscreteProbabilityDistribution<E>
         for (int i=0; i < probability.length; i++)
             {
                 E outcome = outcomes.get(i);
-                double prob = probability[i];
+                //double prob = probability[i];
+                double prob = inputProbabilities.get(i);
                 returnString = returnString + String.format("[%s, %.2f]", outcome.toString(), 100.0 * prob);
                 if ( i < probability.length - 1 )
                     returnString = returnString + "\n";
@@ -173,7 +183,7 @@ public class DiscreteProbabilityDistribution<E>
     @Override
     public int hashCode()
     {
-        return Objects.hash(probability,outcomes,alias);
+        return Objects.hash(probability,outcomes,alias,inputProbabilities);
     }
 
     // equals
@@ -195,7 +205,8 @@ public class DiscreteProbabilityDistribution<E>
         DiscreteProbabilityDistribution<?> dist = (DiscreteProbabilityDistribution<?>)obj;
         if ( ! Arrays.equals(dist.probability, probability) ||
              ! dist.outcomes.equals(outcomes) ||
-             ! Arrays.equals(dist.alias, alias) )
+             ! Arrays.equals(dist.alias, alias) ||
+             ! dist.inputProbabilities.equals(inputProbabilities) )
             return false;
         return true;
     }
