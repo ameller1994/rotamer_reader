@@ -8,4 +8,7 @@ public class Settings
 {
     /** the directory containing the Dunbrack backbone-dependent rotamer data */
     public static final String ROTAMER_LIBRARY_DIRECTORY = "rotamer_library/";
+
+    /** the file containing the omega data */
+    public static final String OMEGA_DATA_FILENAME = "omega/omegaCDL_OmegaBetweenAsPhi1Psi0_KernRegr_v1.3.1_Aug12-2011.txt";
 }
