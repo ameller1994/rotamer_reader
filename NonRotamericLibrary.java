@@ -10,17 +10,39 @@ import com.google.common.collect.*;
  */
 public class NonRotamericLibrary extends SideChainRotamerLibrary
 {
+
+    public class NonRotamericAngles {
+	
+	private Pair<List<Double>,DiscreteProbabilityDistribution<Double>> outcome;
+
+	public NonRotamericAngles(List<Double> chis, DiscreteProbabilityDistribution<Double> dpd) {
+	    outcome = new Pair<>(chis, dpd);
+	}
+
+	public List<Double> getRotamericAngles() {
+	    return outcome.getFirst();
+	}
+	
+	public DiscreteProbabilityDistribution<Double> getDPD() {
+	    return outcome.getSecond();
+	}
+    }
+				
+	
     /**
       * Data storage is accomplished using map from back bone angles to each rotamer (list of chis)
       * (phi, psi) ---> [[ X1, X2, ..., Xn-1 ], probability of this rotamer]
       */ 
-    private Map<SideChainRotamerLibrary.BackboneAngles, DiscreteProbabilityDistribution<List<Double>>> dataset; 
+    private Map<SideChainRotamerLibrary.BackboneAngles, DiscreteProbabilityDistribution<NonRotamericAngles>> dataset; 
     
     /** The number n-1 of normal chi angles: X1, X2, ..., Xn-1 */
     private Integer numberOfSidechainTorsions = null;
 
     /** The type of amino acid these data are for. */
     private AminoAcid aminoAcid;
+
+    /** The number of torsion angles for the last chi */
+    private Integer numberOfLastChis = null;
 
     /**
      * creates a RotamericLibrary by reading in filename associated with amino acid
@@ -43,23 +65,23 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
                 if ( aminoAcid.getFilename().indexOf("rotamers") > -1 )
                     throw new IllegalArgumentException("Should not be using RotamericLibrary to read standard rotameric side chains!");
 
-                **** start working right here!
+                                
+		List<Double> tempProbabilities = new ArrayList<>();
+		List<NonRotamericAngles> tempNRA = new ArrayList<>();
                 
-                List<List<Double>> tempChis = new ArrayList<>();
-                List<Double> tempProbabilities = new ArrayList<>();
-                
+		List<Double> lastChi = new ArrayList<>();
 
                 Double lastPhi = null;
                 Double lastPsi = null;
                     
                 while (thisFile.hasNextLine())
                     {
-			            String currentLine = thisFile.nextLine();
+			String currentLine = thisFile.nextLine();
 			
-    	        		// parse currentLine to access data fields
-	            		String[] parts = currentLine.split("\\s+");
+			// parse currentLine to access data fields
+			String[] parts = currentLine.split("\\s+");
 		    
-			            // valid data is stored on lines that contain the
+			// valid data is stored on lines that contain the
                         // abbreviated amino acid name as the first field
                         if ( currentLine.indexOf("Number of chi angles treated as discrete") > -1 )
                             {
@@ -67,64 +89,103 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
                                 numberOfSidechainTorsions = Integer.valueOf(parts[parts.length-1]);
                                 continue;
                             }
-			            else if (!parts[0].equals(aminoAcid.toString().toUpperCase()))
+			//access the possible values for the last chi
+			else if ( currentLine.indexOf("# chi3 interval, deg") > -1)
+			    {
+				// parse currentLine to access data fields
+				parts = currentLine.split("\\s+");
+				parts[4] = parts[4].replace(",","");
+				Double minAngle = Double.parseDouble(parts[4].replace("[",""));
+				System.out.println(minAngle);
+
+				Double maxAngle = Double.parseDouble(parts[5].replace("]",""));
+				System.out.println(maxAngle);
+				//access next line to read spacing
+				currentLine = thisFile.nextLine();
+				parts = currentLine.split("\\s+");
+				Double spacing = Double.parseDouble(parts[4]);
+				for (Double i = minAngle; i < maxAngle ; i = i+spacing)
+				    lastChi.add(minAngle);
+
+				numberOfLastChis = (int) ((maxAngle-minAngle) / spacing); //could be off by one
+				System.out.println(numberOfLastChis);
+				continue;
+			    }
+								    
+				
+			else if (!parts[0].equals(aminoAcid.toString().toUpperCase()))
                             continue;
 			
-			            // read backbone angles with parts.get(1) and parts.get(2)
-			            Double currPhi = Double.parseDouble(parts[1]);
-			            Double currPsi = Double.parseDouble(parts[2]);
+			// read backbone angles with parts.get(1) and parts.get(2)
+			Double currPhi = Double.parseDouble(parts[1]);
+			Double currPsi = Double.parseDouble(parts[2]);
                         if ( lastPhi == null )
                             lastPhi = currPhi;
                         if ( lastPsi == null )
                             lastPsi = currPsi;
 
                         // assumes entries are consecutive for one pair of (phi,psi)
-			            if ( !currPhi.equals(lastPhi) || !currPsi.equals(lastPsi))  
+			if ( !currPhi.equals(lastPhi) || !currPsi.equals(lastPsi))  
                             {
                                 // this is a new (phi,psi) pair, so create a new BackboneAngles object
                                 // for all the data we've looked at so far
                                 BackboneAngles backboneAngles = new BackboneAngles(lastPhi, lastPsi);
 
+				System.out.println(tempNRA.size());
+				System.out.println(tempProbabilities.size());
+
                                 // create DiscreteProbabilityDataSet object
-                                DiscreteProbabilityDistribution<List<Double>> dpd = new DiscreteProbabilityDistribution<>(
-                                                                                         ImmutableList.copyOf(tempChis),
+                                DiscreteProbabilityDistribution<NonRotamericAngles> dpd = new DiscreteProbabilityDistribution<>(
+                                                                                         ImmutableList.copyOf(tempNRA),
                                                                                          ImmutableList.copyOf(tempProbabilities));
 
                                 // put new entry into map for this BackboneAngle
                                 dataset.put(backboneAngles, dpd);
 
                                 // reset for next round
-                                tempChis.clear();
+                                tempNRA.clear();
                                 tempProbabilities.clear();
-			                }
+			    }
 
-                        // check if this probability falls below the threshold
-                        if ( Double.valueOf(parts[8]) < Settings.ROTAMER_LIBRARY_THRESHOLD )
-                            continue;
+			// check if this probability falls below the threshold
+			if ( Double.valueOf(parts[4+numberOfSidechainTorsions]) < Settings.ROTAMER_LIBRARY_THRESHOLD )
+			    continue;
 
-			            // add to temporary list of list of chis and probabilites
-			            List<Double> chis = new ArrayList<Double>();
+			// add to temporary list of list of chis and probabilites
+			List<Double> chis = new ArrayList<Double>();
 			
-	            		// chi values are in columns 9, 10, 11, 12 and probability is in column 8
-	            		for (int i=9; i < 9+numberOfSidechainTorsions; i++)
-			            chis.add(Double.valueOf(parts[i]));
-			            tempChis.add(ImmutableList.copyOf(chis));
-			            tempProbabilities.add(Double.valueOf(parts[8]));
+			//add to temporary probabilities
+			tempProbabilities.add(Double.valueOf(parts[4+numberOfSidechainTorsions]));
 			
+			// chi values are in columns 6 through the end of the discrete angles and probability is in column 5
+			for (int i=6; i < 6+numberOfSidechainTorsions; i++)
+			    chis.add(Double.valueOf(parts[i]));
+			
+			List<Double> lastChiProbabilities = new ArrayList<>();
+			for (int i=5+3*numberOfSidechainTorsions; i<parts.length; i++)
+			    lastChiProbabilities.add(Double.valueOf(parts[i]));
+
+			System.out.println(lastChiProbabilities.get(lastChiProbabilities.size()-1));
+			System.out.println(lastChiProbabilities.size());
+			System.out.println(lastChiProbabilities.toString());
+
+			DiscreteProbabilityDistribution<Double> lastChiDPD = new DiscreteProbabilityDistribution<>(lastChi,lastChiProbabilities); 
+			tempNRA.add(new NonRotamericAngles(chis,lastChiDPD));
+				    
                         // store last entries
                         lastPhi = currPhi;
                         lastPsi = currPsi;
-		            }
+		    }
 		
-		        // include edge case
-		        BackboneAngles backboneAngles = new BackboneAngles(lastPhi, lastPsi);
-
-		        // create DiscreteProbabilityDataSet object
-		        DiscreteProbabilityDistribution<List<Double>> dpd = new DiscreteProbabilityDistribution<>(
-				                    									  ImmutableList.copyOf(tempChis),
-									                    				  ImmutableList.copyOf(tempProbabilities));
-		        // put new entry into map for this BackboneAngle
-		        dataset.put(backboneAngles, dpd);
+		// include edge case
+		BackboneAngles backboneAngles = new BackboneAngles(lastPhi, lastPsi);
+		
+		// create DiscreteProbabilityDataSet object
+		DiscreteProbabilityDistribution<NonRotamericAngles> dpd = new DiscreteProbabilityDistribution<>(
+														ImmutableList.copyOf(tempNRA),
+														ImmutableList.copyOf(tempProbabilities));
+		// put new entry into map for this BackboneAngle
+		dataset.put(backboneAngles, dpd);
             }
         catch (IOException e)
             {
@@ -149,7 +210,7 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
      * @param psi a Double with the corresponding psi from the backbone
      * @return a DPD object with list of chis as outcomes and associated probabilities for a phi and psi
      */
-    public DiscreteProbabilityDistribution<List<Double>> get(Double phi, Double psi)
+    public DiscreteProbabilityDistribution<NonRotamericAngles> get(Double phi, Double psi)
     {
         if (phi > 180.0 || phi < -180.0 || psi > 180.0 || psi < -180.0)
             throw new IllegalArgumentException("psi and phi must be between -180 and 180");
@@ -169,7 +230,7 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
         Double phi_rounded = Math.round((phi + rounder_phi)/ 10.0) * 10.0;
         
         // return the appropriate data
-        DiscreteProbabilityDistribution<List<Double>> dpd = dataset.get(new SideChainRotamerLibrary.BackboneAngles(phi_rounded,psi_rounded));
+        DiscreteProbabilityDistribution<NonRotamericAngles> dpd = dataset.get(new SideChainRotamerLibrary.BackboneAngles(phi_rounded,psi_rounded));
         if ( dpd == null )
             throw new NullPointerException("data not found!");
         return dpd;
@@ -197,7 +258,7 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
             if ( !(obj instanceof RotamericLibrary) )
                 return false;
 
-        RotamericLibrary rotLib = (RotamericLibrary) obj;
+        NonRotamericLibrary rotLib = (NonRotamericLibrary) obj;
 
         //check for matching datasets
         if (!rotLib.dataset.equals(dataset))
@@ -221,18 +282,19 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
     @Override
     public int hashCode()
     {
-        return Objects.hash(dataset, aminoAcid, numberOfSidechainTorsions);
+        return Objects.hash(dataset, aminoAcid, numberOfSidechainTorsions, numberOfLastChis);
     }
 
     /** Tests the functionality of this library. */
     public static void main(String[] args)
     {
-	    RotamericLibrary rotLib1 = new RotamericLibrary(AminoAcid.MET);
-	    System.out.println(rotLib1.get(177.6,179.2).toString());
-	    RotamericLibrary rotLib2 = new RotamericLibrary(AminoAcid.LYS);
-	    RotamericLibrary rotLib3 = new RotamericLibrary(AminoAcid.MET);
-        System.out.println(rotLib1.equals(rotLib2));
-        System.out.println(rotLib1.equals(rotLib3));
+	NonRotamericLibrary rotLib1 = new NonRotamericLibrary(AminoAcid.GLU);
+	System.out.println(rotLib1.get(177.6,179.2).toString());
+	    
+	    //RotamericLibrary rotLib2 = new RotamericLibrary(AminoAcid.LYS);
+	    //RotamericLibrary rotLib3 = new RotamericLibrary(AminoAcid.MET);
+	    //System.out.println(rotLib1.equals(rotLib2));
+	    //System.out.println(rotLib1.equals(rotLib3));
 
 	    //System.out.println(rotLib.get(-180.0,-60.0).toString());
     }

@@ -8,11 +8,11 @@ public abstract class SideChainRotamerLibrary
     /** Represents a (phi, psi) pair. */
     public static class BackboneAngles
     {
-	    private final Pair<Double> pair;
+	private final Pair<Double,Double> pair;
 	
-	    public BackboneAngles(Double phi, Double psi)
+	public BackboneAngles(Double phi, Double psi)
         {
-	        pair = new Pair<Double>(phi,psi);
+	    pair = new Pair<>(phi,psi);
 	    }
 	
 	    public Double getPhi()

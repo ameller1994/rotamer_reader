@@ -4,15 +4,15 @@ import java.util.*;
  * This is a utility generic class that represents an ordered pair.
  * This class is immutable.
  */
-public class Pair<E>
+public class Pair<K,V>
 {
-    private E firstValue;
-    private E secondValue;
+    private K firstValue;
+    private V secondValue;
     
     /**
      * Constructs an immutable pair.
      */
-    public Pair(E firstVal, E secondVal)
+    public Pair(K firstVal, V secondVal)
     {
 	    this.firstValue = firstVal;
 	    this.secondValue = secondVal;
@@ -22,7 +22,7 @@ public class Pair<E>
      * Returns the first value of this pair.
      * @return the first value
      */
-    public E getFirst()
+    public K getFirst()
     {
 	    return firstValue;
     }
@@ -31,7 +31,7 @@ public class Pair<E>
      * Returns the second value of this pair.
      * @return the second value
      */
-    public E getSecond()
+    public V getSecond()
     {
 	    return secondValue;
     }
@@ -69,7 +69,7 @@ public class Pair<E>
         if ( !(obj instanceof Pair) )
             return false;
 
-        Pair<?> anotherPair = (Pair<?>)obj;
+        Pair<?,?> anotherPair = (Pair<?,?>)obj;
         if ( this.firstValue.equals(anotherPair.firstValue) &&
              this.secondValue.equals(anotherPair.secondValue)  )
             return true;
