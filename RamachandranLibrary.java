@@ -10,19 +10,27 @@ public class RamachandranLibrary
     {
         if (INSTANCE != null)
             throw new IllegalStateException("this should be a singleton!");
-    }
-
-    public static void main(String[] args)
-    {
         GZIPInputStream gzip = null;
         BufferedReader br = null;
         try
             {
                 gzip = new GZIPInputStream(new FileInputStream("ramachandran/NDRD_TCB.txt.gz"));
                 br = new BufferedReader(new InputStreamReader(gzip));
-                for (int i=0; i < 500; i++)
+                PrintWriter pw = new PrintWriter("NDRD_extract.txt");
+                //for (int i=0; i < 250000; i++)
+                int count = 0;
+                while (true)
                     {
-                        System.out.println(br.readLine());
+                        String currentLine = br.readLine();
+                        if ( currentLine == null )
+                            break;
+                        String[] fields = currentLine.split("\\s+");
+                        count++;
+                        if ( fields.length > 1 && ! fields[1].equals("left") )
+                        //pw.println(br.readLine());
+                            System.out.println(currentLine);
+                        else
+                            System.out.print(count + "\r");
                     }
                 br.close();
                 gzip.close();
@@ -32,5 +40,15 @@ public class RamachandranLibrary
                 e.printStackTrace();
                 System.exit(1);
             }
+    }
+
+    public String toString()
+    {
+        return "";
+    }
+
+    public static void main(String[] args)
+    {
+        System.out.println(INSTANCE);
     }
 }

@@ -11,24 +11,77 @@ import com.google.common.collect.*;
 public class NonRotamericLibrary extends SideChainRotamerLibrary
 {
 
-    public class NonRotamericAngles {
-	
-	private Pair<List<Double>,DiscreteProbabilityDistribution<Double>> outcome;
+    /**
+     * Utility class for the probabilistic outcomes.  Contains a list of standard torsion angles
+     * and a distribution for the last non-rotameric angle.  This class is immutable.
+     */
+    public class NonRotamericAngles
+    {
+        /** X1, X2, ..., Xn-1 torsion angles in degrees */
+        private final List<Double> standardTorsionAngles;
 
-	public NonRotamericAngles(List<Double> chis, DiscreteProbabilityDistribution<Double> dpd) {
-	    outcome = new Pair<>(chis, dpd);
-	}
+        /** a discrete distribution for Xn */
+        private final DiscreteProbabilityDistribution<Double> nonRotamericTorsionAngleDistribution;
 
-	public List<Double> getRotamericAngles() {
-	    return outcome.getFirst();
-	}
+        /** constructs an immutable instance of this class */
+        public NonRotamericAngles(List<Double> chis, DiscreteProbabilityDistribution<Double> dpd)
+        {
+            standardTorsionAngles = ImmutableList.copyOf(chis);
+            nonRotamericTorsionAngleDistribution = dpd;
+        }
+
+        /**
+         * returns X1, X2, ..., Xn-1 torsion angles in degrees 
+         * @return X1, X2, ..., Xn-1 torsion angles in degrees
+         */
+	    public List<Double> getRotamericAngles()
+        {
+	        return standardTorsionAngles;
+	    }
 	
-	public DiscreteProbabilityDistribution<Double> getDPD() {
-	    return outcome.getSecond();
-	}
+        /**
+         * returns the discrete probability distribution for the non-rotameric torsion angle
+         * @return the discrete probability distribution for the non-rotameric torsion angle (degrees)
+         */
+	    public DiscreteProbabilityDistribution<Double> getDPD()
+        {
+            return nonRotamericTorsionAngleDistribution;
+	    }
+
+        /**
+         * returns a brief description
+         * @return brief description
+         */
+        public String toString()
+        {
+            return standardTorsionAngles.toString() + "\n" + nonRotamericTorsionAngleDistribution.toString();
+        }
+
+        /**
+         * returns the hash code
+         * @return the hash code
+         */
+        public int hashCode()
+        {
+            return Objects.hash(standardTorsionAngles, nonRotamericTorsionAngleDistribution);
+        }
+
+        /**
+         * tests for object equality
+         * @return true if the object's fields are logically equivalent
+         */
+        public boolean equals(Object obj)
+        {
+            if ( obj == null )
+                return false;
+            if ( ! (obj instanceof NonRotamericAngles) )
+                return false;
+            final NonRotamericAngles other = (NonRotamericAngles)obj;
+            return (Objects.equals(standardTorsionAngles, other.standardTorsionAngles) &&
+                    Objects.equals(nonRotamericTorsionAngleDistribution, other.nonRotamericTorsionAngleDistribution));
+        }
     }
 				
-	
     /**
       * Data storage is accomplished using map from back bone angles to each rotamer (list of chis)
       * (phi, psi) ---> [[ X1, X2, ..., Xn-1 ], probability of this rotamer]
