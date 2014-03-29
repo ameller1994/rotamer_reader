@@ -249,7 +249,6 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
     /**
      * returns the DiscreteProbabilityDistribution associated with phi and psi
      * rounds psi and phi to nearest multiple of 10
-     * rounding algorithm based on <a href="http://stackoverflow.com/questions/9303604/rounding-up-a-number-to-nearest-multiple-of-5">StackOverflow</a>
      * @param phi a Double with the corresponding phi from the backbone
      * @param psi a Double with the corresponding psi from the backbone
      * @return a DPD object with list of chis as outcomes and associated probabilities for a phi and psi
@@ -259,27 +258,20 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
         if (phi > 180.0 || phi < -180.0 || psi > 180.0 || psi < -180.0)
             throw new IllegalArgumentException("psi and phi must be between -180 and 180");
         
-        // round to the neaerest multiple of 10
-        Double rounder_psi = 5.0;
-        Double rounder_phi = 5.0;
-        
-        // need to subtract 5 to round to nearest multiple of 10 if psi or phi are negative
-        if (psi < 0)
-            rounder_psi = -5.0;
-        if (phi < 0)
-            rounder_phi = -5.0;
-        
-        // find the nearest multiples of 5
-        Double phi_rounded = Math.round((phi + rounder_phi)/ 10.0) * 10.0;
-        Double psi_rounded = Math.round((psi + rounder_psi)/ 10.0) * 10.0;
-        System.out.println("rounded: " + phi_rounded + ", " + psi_rounded);
-        // return the appropriate data
+        // round to nearest 10 and return the appropriate data
+        double phi_rounded = roundTo10(phi);
+        double psi_rounded = roundTo10(psi);
         DiscreteProbabilityDistribution<NonRotamericAngles> dpd = dataset.get(new SideChainRotamerLibrary.BackboneAngles(phi_rounded,psi_rounded));
         if ( dpd == null )
             throw new NullPointerException("data not found!");
         return dpd;
     }
-    
+
+    public static double roundTo10(double number)
+    {
+        return Math.rint(number/10)*10.0;
+    }
+
     /**
      * Gives a short textual description of this database.
      * @return a brief sentence
