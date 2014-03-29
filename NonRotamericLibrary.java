@@ -10,7 +10,6 @@ import com.google.common.collect.*;
  */
 public class NonRotamericLibrary extends SideChainRotamerLibrary
 {
-
     /**
      * Utility class for the probabilistic outcomes.  Contains a list of standard torsion angles
      * and a distribution for the last non-rotameric angle.  This class is immutable.
@@ -54,7 +53,7 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
          */
         public String toString()
         {
-            return standardTorsionAngles.toString() + "\n" + nonRotamericTorsionAngleDistribution.toString();
+            return String.format("X1...Xn-1: %s\nXn: %s\n", standardTorsionAngles.toString(), nonRotamericTorsionAngleDistribution.toString());
         }
 
         /**
@@ -83,9 +82,11 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
     }
 				
     /**
-      * Data storage is accomplished using map from back bone angles to each rotamer (list of chis)
-      * (phi, psi) ---> [[ X1, X2, ..., Xn-1 ], probability of this rotamer]
-      */ 
+      * Data is stored in this nested structure:
+      * BackboneAngles(phi,psi) --> DiscreteProbabilityDistribution( NonRotamericAngles, Double probabilities )
+      * where NonRotamericAngles is a List<Double> of chis and a DiscreteProbabilityDistribution
+      * in the last non-rotameric angle.
+      */
     private Map<SideChainRotamerLibrary.BackboneAngles, DiscreteProbabilityDistribution<NonRotamericAngles>> dataset; 
     
     /** The number n-1 of normal chi angles: X1, X2, ..., Xn-1 */
@@ -93,9 +94,6 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
 
     /** The type of amino acid these data are for. */
     private AminoAcid aminoAcid;
-
-    /** The number of torsion angles for the last chi */
-    private Integer numberOfLastChis = null;
 
     /**
      * creates a RotamericLibrary by reading in filename associated with amino acid
@@ -117,128 +115,121 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
                 // make sure this is the right kind of file
                 if ( aminoAcid.getFilename().indexOf("rotamers") > -1 )
                     throw new IllegalArgumentException("Should not be using RotamericLibrary to read standard rotameric side chains!");
+		        
+                // stores which fields have regular chi data in them
+                List<Integer> chiFieldNumbers = new LinkedList<>();
+                int probabilityFieldIndex = 0;
 
-                                
-		List<Double> tempProbabilities = new ArrayList<>();
-		List<NonRotamericAngles> tempNRA = new ArrayList<>();
-                
-		List<Double> lastChi = new ArrayList<>();
+                // stores which fields have non-rotameric chi data in them
+                List<Double> nonRotamericChiLabels = new LinkedList<>();
+                List<Integer> nonRotamericChiFieldNumbers = new LinkedList<>();
 
                 Double lastPhi = null;
                 Double lastPsi = null;
-                    
+
+                List<NonRotamericAngles> tempNRA = new LinkedList<>();   // the domain for this line
+                List<Double> tempProbabilities   = new LinkedList<>();   // the range (i.e., probability) for this line of (X1, X2, ..., Xn-1, non-rotameric distribution)
+
                 while (thisFile.hasNextLine())
                     {
-			String currentLine = thisFile.nextLine();
+			            String currentLine = thisFile.nextLine();
 			
-			// parse currentLine to access data fields
-			String[] parts = currentLine.split("\\s+");
+			            // parse currentLine to access data fields
+			            String[] parts = currentLine.split("\\s+");
 		    
-			// valid data is stored on lines that contain the
+			            // valid data is stored on lines that contain the
                         // abbreviated amino acid name as the first field
                         if ( currentLine.indexOf("Number of chi angles treated as discrete") > -1 )
                             {
-                                // records the number of torsions we need to store
+                                // records the number of torsions we need to store (n-1)
                                 numberOfSidechainTorsions = Integer.valueOf(parts[parts.length-1]);
                                 continue;
                             }
-			//access the possible values for the last chi
-			else if ( currentLine.indexOf("# chi3 interval, deg") > -1)
-			    {
-				// parse currentLine to access data fields
-				parts = currentLine.split("\\s+");
-				parts[4] = parts[4].replace(",","");
-				Double minAngle = Double.parseDouble(parts[4].replace("[",""));
-				System.out.println(minAngle);
+                        else if ( currentLine.indexOf("chi1Val") > -1 )
+                            {
+                                // compute which field have chis(1,2,...,n-1)
+                                int currentField = 4;
+                                for (int i=currentField; i <= 4+numberOfSidechainTorsions; i++)
+                                    currentField++;
+                                //System.out.println("chi val start:" + currentField);
+                                for (int i=currentField; i < currentField+numberOfSidechainTorsions; i++)
+                                    chiFieldNumbers.add(i);
+                                //System.out.println("Chi field numbers: " + chiFieldNumbers.toString());
 
-				Double maxAngle = Double.parseDouble(parts[5].replace("]",""));
-				System.out.println(maxAngle);
-				//access next line to read spacing
-				currentLine = thisFile.nextLine();
-				parts = currentLine.split("\\s+");
-				Double spacing = Double.parseDouble(parts[4]);
-				for (Double i = minAngle; i < maxAngle ; i = i+spacing)
-				    lastChi.add(minAngle);
+                                // compute which fields have chi(n) labels
+                                currentField = chiFieldNumbers.get(0) - 1;
+                                probabilityFieldIndex = currentField;
+                                //System.out.println("prob:" + currentField);
+                                currentField = currentField + 2*chiFieldNumbers.size() + 1;
+                                //System.out.println("start:" + currentField);
+                                for (int i=currentField; i < parts.length-1; i++)
+                                    {
+                                        nonRotamericChiLabels.add(Double.valueOf(parts[i+1]));
+                                        nonRotamericChiFieldNumbers.add(i);
+                                    }
 
-				numberOfLastChis = (int) ((maxAngle-minAngle) / spacing); //could be off by one
-				System.out.println(numberOfLastChis);
-				continue;
-			    }
-								    
-				
-			else if (!parts[0].equals(aminoAcid.toString().toUpperCase()))
+                                //System.out.println("non-rotameric fields: " + nonRotamericChiFieldNumbers.toString());
+                                //System.out.println("labels: " + nonRotamericChiLabels);
+                                //System.out.println( nonRotamericChiFieldNumbers.size() + " / " + nonRotamericChiLabels.size() );
+                                continue;
+                            }
+			            else if (!parts[0].equals(aminoAcid.toString().toUpperCase()))
                             continue;
-			
-			// read backbone angles with parts.get(1) and parts.get(2)
-			Double currPhi = Double.parseDouble(parts[1]);
-			Double currPsi = Double.parseDouble(parts[2]);
+
+                        // ignore low-probability rotamers
+                        Double probability = Double.valueOf(parts[probabilityFieldIndex]);
+			            if ( probability < Settings.ROTAMER_LIBRARY_THRESHOLD )
+                            continue;
+
+			            // read backbone angles with parts.get(1) and parts.get(2)
+			            Double currPhi = Double.parseDouble(parts[1]);
+			            Double currPsi = Double.parseDouble(parts[2]);
                         if ( lastPhi == null )
                             lastPhi = currPhi;
                         if ( lastPsi == null )
                             lastPsi = currPsi;
 
-                        // assumes entries are consecutive for one pair of (phi,psi)
-			if ( !currPhi.equals(lastPhi) || !currPsi.equals(lastPsi))  
+                        // if we are working on a new phi,psi pair, then
+                        // load the last block into the database
+                        // this assumes entries are consecutive for one pair of (phi,psi)
+                        if ( !currPhi.equals(lastPhi) || !currPsi.equals(lastPsi))
                             {
-                                // this is a new (phi,psi) pair, so create a new BackboneAngles object
-                                // for all the data we've looked at so far
-                                BackboneAngles backboneAngles = new BackboneAngles(lastPhi, lastPsi);
+                                SideChainRotamerLibrary.BackboneAngles bba = new SideChainRotamerLibrary.BackboneAngles(lastPhi,lastPsi);
+                                
+                                // create the distribution that stores entries for this entire block
+                                DiscreteProbabilityDistribution<NonRotamericAngles> outerDPD = new DiscreteProbabilityDistribution<>(tempNRA,tempProbabilities); 
+                                dataset.put(bba, outerDPD);
+                                tempNRA = new LinkedList<>();
+                                tempProbabilities = new LinkedList<>();
+                            }
 
-				System.out.println(tempNRA.size());
-				System.out.println(tempProbabilities.size());
+                        // read chi angles
+                        List<Double> regularChis = new LinkedList<>();
+                        for (Integer i : chiFieldNumbers)
+                            regularChis.add(Double.valueOf(parts[i]));
 
-                                // create DiscreteProbabilityDataSet object
-                                DiscreteProbabilityDistribution<NonRotamericAngles> dpd = new DiscreteProbabilityDistribution<>(
-                                                                                         ImmutableList.copyOf(tempNRA),
-                                                                                         ImmutableList.copyOf(tempProbabilities));
+                        // read non-rotameric chi distribution
+                        List<Double> temp = new LinkedList<>();
+                        for (Integer i : nonRotamericChiFieldNumbers)
+                            temp.add(Double.valueOf(parts[i]));
 
-                                // put new entry into map for this BackboneAngle
-                                dataset.put(backboneAngles, dpd);
+                        // create DiscreteProbabilityDistribution that stores that non-rotameric distribution for this line
+                        // note: everything points to the same list of labels!  efficiency here we come!
+                        DiscreteProbabilityDistribution<Double> innerDPD = new DiscreteProbabilityDistribution<>(nonRotamericChiLabels, temp); 
 
-                                // reset for next round
-                                tempNRA.clear();
-                                tempProbabilities.clear();
-			    }
+                        // create NonRotamericAngles
+                        NonRotamericAngles thisNRA = new NonRotamericAngles(regularChis,innerDPD);
 
-			// check if this probability falls below the threshold
-			if ( Double.valueOf(parts[4+numberOfSidechainTorsions]) < Settings.ROTAMER_LIBRARY_THRESHOLD )
-			    continue;
+                        // add this line to the temporary list
+                        tempNRA.add(thisNRA);
+                        tempProbabilities.add(probability);
 
-			// add to temporary list of list of chis and probabilites
-			List<Double> chis = new ArrayList<Double>();
-			
-			//add to temporary probabilities
-			tempProbabilities.add(Double.valueOf(parts[4+numberOfSidechainTorsions]));
-			
-			// chi values are in columns 6 through the end of the discrete angles and probability is in column 5
-			for (int i=6; i < 6+numberOfSidechainTorsions; i++)
-			    chis.add(Double.valueOf(parts[i]));
-			
-			List<Double> lastChiProbabilities = new ArrayList<>();
-			for (int i=5+3*numberOfSidechainTorsions; i<parts.length; i++)
-			    lastChiProbabilities.add(Double.valueOf(parts[i]));
-
-			System.out.println(lastChiProbabilities.get(lastChiProbabilities.size()-1));
-			System.out.println(lastChiProbabilities.size());
-			System.out.println(lastChiProbabilities.toString());
-
-			DiscreteProbabilityDistribution<Double> lastChiDPD = new DiscreteProbabilityDistribution<>(lastChi,lastChiProbabilities); 
-			tempNRA.add(new NonRotamericAngles(chis,lastChiDPD));
-				    
-                        // store last entries
+                        // reset for next round
                         lastPhi = currPhi;
                         lastPsi = currPsi;
-		    }
-		
-		// include edge case
-		BackboneAngles backboneAngles = new BackboneAngles(lastPhi, lastPsi);
-		
-		// create DiscreteProbabilityDataSet object
-		DiscreteProbabilityDistribution<NonRotamericAngles> dpd = new DiscreteProbabilityDistribution<>(
-														ImmutableList.copyOf(tempNRA),
-														ImmutableList.copyOf(tempProbabilities));
-		// put new entry into map for this BackboneAngle
-		dataset.put(backboneAngles, dpd);
+		            }
+
+                // edge case: store last block of data
             }
         catch (IOException e)
             {
@@ -279,9 +270,9 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
             rounder_phi = -5.0;
         
         // find the nearest multiples of 5
-        Double psi_rounded = Math.round((psi + rounder_psi)/ 10.0) * 10.0;
         Double phi_rounded = Math.round((phi + rounder_phi)/ 10.0) * 10.0;
-        
+        Double psi_rounded = Math.round((psi + rounder_psi)/ 10.0) * 10.0;
+        System.out.println("rounded: " + phi_rounded + ", " + psi_rounded);
         // return the appropriate data
         DiscreteProbabilityDistribution<NonRotamericAngles> dpd = dataset.get(new SideChainRotamerLibrary.BackboneAngles(phi_rounded,psi_rounded));
         if ( dpd == null )
@@ -335,20 +326,14 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
     @Override
     public int hashCode()
     {
-        return Objects.hash(dataset, aminoAcid, numberOfSidechainTorsions, numberOfLastChis);
+        return Objects.hash(dataset, aminoAcid, numberOfSidechainTorsions);
     }
 
     /** Tests the functionality of this library. */
     public static void main(String[] args)
     {
-	NonRotamericLibrary rotLib1 = new NonRotamericLibrary(AminoAcid.GLU);
-	System.out.println(rotLib1.get(177.6,179.2).toString());
-	    
-	    //RotamericLibrary rotLib2 = new RotamericLibrary(AminoAcid.LYS);
-	    //RotamericLibrary rotLib3 = new RotamericLibrary(AminoAcid.MET);
-	    //System.out.println(rotLib1.equals(rotLib2));
-	    //System.out.println(rotLib1.equals(rotLib3));
-
-	    //System.out.println(rotLib.get(-180.0,-60.0).toString());
+	    NonRotamericLibrary rotLib1 = new NonRotamericLibrary(AminoAcid.ASN);
+	    System.out.println(rotLib1);
+        System.out.println(rotLib1.get(81.0,60.1).toString());
     }
 }

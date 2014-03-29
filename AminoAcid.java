@@ -41,7 +41,7 @@ public enum AminoAcid
     ASN("Asn",      "aspargine",     RotamerType.NON_ROTAMERIC),
     GLN("Gln",      "glutamine",     RotamerType.NON_ROTAMERIC),
     LYS("Lys",      "lysine",        RotamerType.IS_ROTAMERIC),
-    ARG("Arg",      "arginine",      RotamerType.NON_ROTAMERIC),
+    ARG("Arg",      "arginine",      RotamerType.IS_ROTAMERIC),
     HIS("His",      "histidine",     RotamerType.NON_ROTAMERIC),
     ASP("Asp",      "aspartate",     RotamerType.NON_ROTAMERIC),
     GLU("Glu",      "glutamate",     RotamerType.NON_ROTAMERIC);

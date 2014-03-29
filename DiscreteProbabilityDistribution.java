@@ -169,7 +169,7 @@ public class DiscreteProbabilityDistribution<E>
                 E outcome = outcomes.get(i);
                 //double prob = probability[i];
                 double prob = inputProbabilities.get(i);
-                returnString = returnString + String.format("[%s, %.2f]", outcome.toString(), 100.0 * prob);
+                returnString = returnString + String.format("{outcome: %s, prob%% = %.2f}", outcome.toString(), 100.0 * prob);
                 if ( i < probability.length - 1 )
                     returnString = returnString + "\n";
             }
