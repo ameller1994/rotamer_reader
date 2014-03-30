@@ -29,6 +29,7 @@ public enum AminoAcid
     VAL("Val",      "valine",          RotamerType.IS_ROTAMERIC),
     LEU("Leu",      "leucine",         RotamerType.IS_ROTAMERIC),
     ILE("Ile",      "isoleucine",      RotamerType.IS_ROTAMERIC),
+    PRO("Pro",      "proline",         RotamerType.SPECIAL),
     CPR("Cpr",      "cis-proline",     RotamerType.IS_ROTAMERIC),
     TPR("Tpr",      "trans-proline",   RotamerType.IS_ROTAMERIC),
     PHE("Phe",      "phenylalanine",   RotamerType.NON_ROTAMERIC),

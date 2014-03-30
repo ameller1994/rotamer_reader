@@ -30,17 +30,17 @@ public class OmegaLibrary
     
     /**
      * Stores all of the omega data.
-     * String represents the type of data (ResTypeGroup)
-     * first pair is phi(+1),psi(0)
-     * second pair are the given mean and standard deviation
+     * @param <String> represents the type of data (ResTypeGroup: e.g., All, All_nonxpro, etc.)
+     * @param <Pair<Double>,Pair<Double>> first pair is phi(+1),psi(0), second pair is the given mean and standard deviation
      */
-    private Map<String,Map<Pair<Double>,Pair<Double>>> database = new HashMap<>();
+    private Map<String,Map<Pair<Double>,Pair<Double>>> database;
 
     /** Private constructor should only be called once! */
     private OmegaLibrary()
     {
         if ( INSTANCE != null )
             throw new IllegalArgumentException("OmegaLibrary is a singleton!");
+        database = new HashMap<>();
         String filename = Settings.OMEGA_DATA_FILENAME;
 
         // read data from file
@@ -177,7 +177,6 @@ public class OmegaLibrary
 
     /**
      * rounds phi and psi to nearest multiple of 10
-     * rounding algorithm based on <a href="http://stackoverflow.com/questions/9303604/rounding-up-a-number-to-nearest-multiple-of-5">StackOverflow</a>
      * @param inputPair e.g. phi1,psi0 (-179.0, -178.0) 
      * @return the nearest pair on the grid e.g., phi, psi (-180.0, 180.0)
      */
@@ -188,19 +187,8 @@ public class OmegaLibrary
         if (phi > 180.0 || phi < -180.0 || psi > 180.0 || psi < -180.0)
             throw new IllegalArgumentException("psi and phi must be between -180 and 180");
 
-        // round to the neaerest multiple of 10
-        Double rounder_psi = 5.0;
-        Double rounder_phi = 5.0;
-
-        //Need to subtract 5 to round to nearest multiple of 10 if psi or phi are negative
-        if (phi < 0)
-            rounder_phi = -5.0;
-        if (psi < 0)
-            rounder_psi = -5.0;
-
-        // find the nearest multiples of 5
-        Double phi_rounded = Math.round((phi + rounder_phi)/ 10.0) * 10.0;
-        Double psi_rounded = Math.round((psi + rounder_psi)/ 10.0) * 10.0;
+        Double phi_rounded = Math.rint((phi/10)*10.0);
+        Double psi_rounded = Math.rint((psi/10)*10.0);
 
         // return the appropriate data
         return new Pair<Double>(phi_rounded,psi_rounded);

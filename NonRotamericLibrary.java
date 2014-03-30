@@ -261,7 +261,9 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
         // round to nearest 10 and return the appropriate data
         double phi_rounded = roundTo10(phi);
         double psi_rounded = roundTo10(psi);
+        
         DiscreteProbabilityDistribution<NonRotamericAngles> dpd = dataset.get(new SideChainRotamerLibrary.BackboneAngles(phi_rounded,psi_rounded));
+        
         if ( dpd == null )
             throw new NullPointerException("data not found!");
         return dpd;
