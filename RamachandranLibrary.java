@@ -63,10 +63,11 @@ public class RamachandranLibrary
                         if ( currentLine.startsWith("#") || fields.length != 8)
                             continue;
                         
-                        // EDIT: somehow TPR data are missing and we'll just have to use PRO?
-                        // ignore proline, as we will be using cis and trans proline instead
-                        //if ( fields[0].equals("PRO") || fields[2].equals("PRO") )
-                        //    continue;
+                        // special fix for proline -- PRO means trans proline
+                        if ( fields[0].equals("PRO") )
+                            fields[0] = "TPR";
+                        if ( fields[2].equals("PRO") )
+                            fields[2] = "TPR";
 
                         // parse to enum constants
                         AminoAcid currentCentralAminoAcid = AminoAcid.valueOf(fields[0]);
@@ -479,14 +480,14 @@ public class RamachandranLibrary
         //System.out.println(getLeftDistribution(AminoAcid.ALA, AminoAcid.ALL));
         //System.out.println(getRightDistribution(AminoAcid.ALA, AminoAcid.ALL));
 
-        System.out.println(getTripletDistribution(AminoAcid.ILE, AminoAcid.PRO, AminoAcid.MET).toDebugString(0.0001,10));
-        System.out.println(getTripletDistribution(AminoAcid.LEU, AminoAcid.PRO, AminoAcid.MET).toDebugString(0.0001,10));
+        System.out.println(getTripletDistribution(AminoAcid.ILE, AminoAcid.GLY, AminoAcid.MET).toDebugString(0.0001,10));
+        System.out.println(getTripletDistribution(AminoAcid.LEU, AminoAcid.GLY, AminoAcid.MET).toDebugString(0.0001,10));
         
         System.out.println(getTripletDistribution(AminoAcid.TYR, AminoAcid.ARG, AminoAcid.TRP).toDebugString(0.0001,10));
         System.out.println(getTripletDistribution(AminoAcid.PHE, AminoAcid.ARG, AminoAcid.TRP).toDebugString(0.0001,10));
         
-        System.out.println(getTripletDistribution(AminoAcid.ASN, AminoAcid.VAL, AminoAcid.SER).toDebugString(0.0001,10));
-        System.out.println(getTripletDistribution(AminoAcid.ASN, AminoAcid.VAL, AminoAcid.THR).toDebugString(0.0001,10));
+        System.out.println(getTripletDistribution(AminoAcid.ASN, AminoAcid.TPR, AminoAcid.SER).toDebugString(0.0001,10));
+        System.out.println(getTripletDistribution(AminoAcid.ASN, AminoAcid.TPR, AminoAcid.THR).toDebugString(0.0001,10));
         Scanner scanner = new Scanner(System.in);
         System.out.println("Press enter to continue.");
         scanner.nextLine();
