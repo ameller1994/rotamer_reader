@@ -2,6 +2,7 @@ import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.io.*;
 import com.google.common.collect.*;
+import com.google.common.primitives.*;
 
 public class RamachandranLibrary
 {
@@ -11,7 +12,7 @@ public class RamachandranLibrary
     /**
      * stores the Ramachandran data
      */
-    private final Set<Entry> database;
+    private final Map<CustomKey,PreDistribution> database;
 
     /** read all the Ramachandran data */
     private RamachandranLibrary()
@@ -20,7 +21,7 @@ public class RamachandranLibrary
             throw new IllegalStateException("this should be a singleton!");
         
         // temporary copy of the database
-        Set<Entry> tempDatabase = new HashSet<>();
+        Map<CustomKey,PreDistribution> tempDatabase = new HashMap<>();
         
         // read data from zipped file
         GZIPInputStream gzip = null;
@@ -36,7 +37,8 @@ public class RamachandranLibrary
                 AminoAcid lastAdjacentAminoAcid = AminoAcid.ALL;        // the amino acid in field 2
                 
                 // temporary storage while reading a block
-                List<ShortBackboneAngles> tempAngles = new LinkedList<>();  // backbone angles phi,psi
+                List<Double> tempPhis                = new LinkedList<>();  // backbone angle phi
+                List<Double> tempPsis                = new LinkedList<>();  // backbone angle psi
                 List<Double> tempProbabilities       = new LinkedList<>();  // log probabilities
 
                 System.out.println("Reading Ramachandran database...");
@@ -62,6 +64,10 @@ public class RamachandranLibrary
                         Direction currentDirection = Direction.valueOf(fields[1].toUpperCase());
                         AminoAcid currentAdjacentAminoAcid = AminoAcid.valueOf(fields[2]);
 
+                        // for debugging only -- shortens runtime
+                        //if ( ! fields[0].equals("ALA") )
+                        //    break;
+
                         // detect a change in data block
                         if ( lastCentralAminoAcid  != currentCentralAminoAcid ||
                              lastDirection         != currentDirection        ||
@@ -71,26 +77,28 @@ public class RamachandranLibrary
                                 System.out.print( String.format("%5s %5s %5s\r", lastCentralAminoAcid.toString(),
                                                                                  lastDirection.toString(),
                                                                                  lastAdjacentAminoAcid.toString() ) );
-                                
-                                // compile the probability data
-                                DiscreteProbabilityDistribution<ShortBackboneAngles> lastDPD
-                                    = new DiscreteProbabilityDistribution<>(tempAngles, tempProbabilities);
 
-                                // compile the last data block into an Entry object
-                                Entry newEntry = new Entry(lastCentralAminoAcid, lastDirection, lastAdjacentAminoAcid, lastDPD);
+                                // create CustomKey object
+                                CustomKey customKey = new CustomKey(lastCentralAminoAcid, lastDirection, lastAdjacentAminoAcid);
 
-                                // add the Entry to the database
-                                tempDatabase.add(newEntry);
+                                // create PreDistribution object
+                                short[] phiArray = Shorts.toArray(tempPhis);
+                                short[] psiArray = Shorts.toArray(tempPsis);
+                                float[] logProbabilityArray = Floats.toArray(tempProbabilities);
+                                PreDistribution preDistribution = new PreDistribution(phiArray, psiArray, logProbabilityArray);
+
+                                // add to database
+                                tempDatabase.put(customKey, preDistribution);
 
                                 // reset lists
-                                tempAngles = new LinkedList<>();
+                                tempPhis = new LinkedList<>();
+                                tempPsis = new LinkedList<>();
                                 tempProbabilities = new LinkedList<>();
                             }
 
                         // parse fields and add to temporary lists
-                        ShortBackboneAngles theseAngles = new ShortBackboneAngles(Short.parseShort(fields[3]),
-                                                                                  Short.parseShort(fields[4]));
-                        tempAngles.add(theseAngles);
+                        tempPhis.add(Double.valueOf(fields[3]));
+                        tempPsis.add(Double.valueOf(fields[4]));
                         tempProbabilities.add(Double.valueOf(fields[6]));
 
                         // remember for the next line
@@ -100,11 +108,17 @@ public class RamachandranLibrary
                     }
 
                 // deal with edge case
-                DiscreteProbabilityDistribution<ShortBackboneAngles> lastDPD
-                    = new DiscreteProbabilityDistribution<>(tempAngles, tempProbabilities);
+                // create CustomKey object
+                CustomKey customKey = new CustomKey(lastCentralAminoAcid, lastDirection, lastAdjacentAminoAcid);
 
-                Entry newEntry = new Entry(lastCentralAminoAcid, lastDirection, lastAdjacentAminoAcid, lastDPD);
-                tempDatabase.add(newEntry);
+                // create PreDistribution object
+                short[] phiArray = Shorts.toArray(tempPhis);
+                short[] psiArray = Shorts.toArray(tempPsis);
+                float[] logProbabilityArray = Floats.toArray(tempProbabilities);
+                PreDistribution preDistribution = new PreDistribution(phiArray, psiArray, logProbabilityArray);
+
+                // add to database
+                tempDatabase.put(customKey, preDistribution);
 
                 br.close();
                 gzip.close();
@@ -116,12 +130,7 @@ public class RamachandranLibrary
             }
 
         // make dataset immutable
-        database = ImmutableSet.copyOf(tempDatabase);
-
-        System.out.println("\nOperation complete.");
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Press enter to continue.");
-        scanner.next();
+        database = ImmutableMap.copyOf(tempDatabase);
     }
 
     private enum Direction
@@ -130,33 +139,29 @@ public class RamachandranLibrary
         RIGHT;
     }
 
-    private static class Entry
+    private static class CustomKey
     {
         private AminoAcid centralAminoAcid;
         private Direction direction;
         private AminoAcid adjacentAminoAcid;
-        private DiscreteProbabilityDistribution<ShortBackboneAngles> dpd;
 
-        public Entry(AminoAcid centralAminoAcid, Direction direction,
-                     AminoAcid adjacentAminoAcid, DiscreteProbabilityDistribution<ShortBackboneAngles> dpd)
+        public CustomKey(AminoAcid centralAminoAcid, Direction direction, AminoAcid adjacentAminoAcid)
         {
             this.centralAminoAcid = centralAminoAcid;
             this.direction = direction;
             this.adjacentAminoAcid = adjacentAminoAcid;
-            this.dpd = dpd;
         }
 
         public String toString()
         {
-            return String.format("%5s %5s %5s \n%s\n", centralAminoAcid.toString(),
+            return String.format("%5s %5s %5s\n", centralAminoAcid.toString(),
                                                        direction.toString(),
-                                                       adjacentAminoAcid.toString(),
-                                                       dpd.toString() );
+                                                       adjacentAminoAcid.toString() );
         }
 
         public int hashCode()
         {
-            return Objects.hash(centralAminoAcid, direction, adjacentAminoAcid, dpd);
+            return Objects.hash(centralAminoAcid, direction, adjacentAminoAcid);
         }
 
         public boolean equals(Object obj)
@@ -165,48 +170,44 @@ public class RamachandranLibrary
                 return false;
             if ( obj == this )
                 return true;
-            if ( !(obj instanceof ShortBackboneAngles) )
+            if ( !(obj instanceof CustomKey) )
                 return false;
 
-            Entry another = (Entry)obj;
+            CustomKey another = (CustomKey)obj;
             if ( this.centralAminoAcid == another.centralAminoAcid &&
                  this.direction == another.direction &&
-                 this.adjacentAminoAcid == another.adjacentAminoAcid &&
-                 this.dpd.equals(another.dpd)                           )
+                 this.adjacentAminoAcid == another.adjacentAminoAcid )
                 return true;
             return false;
         }
     }
 
-    private static class ShortBackboneAngles
+    private static class PreDistribution
     {
-        private short phi;
-        private short psi;
+        private final short[] phis;
+        private final short[] psis;
+        private final float[] logProbabilities;
 
-        public ShortBackboneAngles(short phi, short psi)
+        public PreDistribution(short[] phis, short[] psis, float[] logProbabilities)
         {
-            this.phi = phi;
-            this.psi = psi;
-        }
-
-        public double getPhi()
-        {
-            return (double)phi;
-        }
-
-        public double getPsi()
-        {
-            return (double)psi;
+            this.phis = phis;
+            this.psis = psis;
+            this.logProbabilities = logProbabilities;
         }
 
         public String toString()
         {
-            return String.format("%d, %d", phi, psi);
+            String returnString = "[";
+            int n = phis.length;
+            for (int i=0; i < n - 1; i++)
+                returnString = returnString + String.format("%5d %5d %.6f,\n", phis[i], psis[i], logProbabilities[i]);
+            returnString = returnString + String.format("%5d %5d %.6f]", phis[n-1], psis[n-1], logProbabilities[n-1]);
+            return returnString;
         }
 
         public int hashCode()
         {
-            return Objects.hash(phi,psi);
+            return Objects.hash(phis,psis,logProbabilities);
         }
 
         public boolean equals(Object obj)
@@ -215,11 +216,13 @@ public class RamachandranLibrary
                 return false;
             if ( obj == this )
                 return true;
-            if ( !(obj instanceof ShortBackboneAngles) )
+            if ( !(obj instanceof PreDistribution) )
                 return false;
 
-            ShortBackboneAngles another = (ShortBackboneAngles)obj;
-            if ( this.phi == another.phi && this.psi == another.psi )
+            PreDistribution another = (PreDistribution)obj;
+            if ( Arrays.equals(phis, another.phis) &&
+                 Arrays.equals(psis, another.psis) &&
+                 Arrays.equals(logProbabilities, another.logProbabilities) )
                 return true;
             return false;
         }
@@ -227,10 +230,30 @@ public class RamachandranLibrary
 
     public String toString()
     {
-        return "";
+        return String.format("Ramachandran database with %d entries", database.size());
+    }
+
+    public static PreDistribution locate(AminoAcid centralAminoAcid, Direction direction, AminoAcid adjacentAminoAcid)
+    {
+        CustomKey thisKey = new CustomKey(centralAminoAcid, direction, adjacentAminoAcid);
+        PreDistribution result = null;
+        for (CustomKey k : INSTANCE.database.keySet())
+            {
+                if ( k.equals(thisKey) )
+                    {
+                        result = INSTANCE.database.get(k);
+                        break;
+                    }
+            }
+        return result;
     }
 
     public static void main(String[] args)
     {
+        System.out.println("\nOperation complete.");
+        System.out.println(locate(AminoAcid.ALA, Direction.LEFT, AminoAcid.ALL));
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Press enter to continue.");
+        scanner.nextLine();
     }
 }
