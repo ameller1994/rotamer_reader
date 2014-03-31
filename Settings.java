@@ -14,4 +14,7 @@ public class Settings
 
     /** the file containing the omega data */
     public static final String OMEGA_DATA_FILENAME = "omega/omegaCDL_OmegaBetweenAsPhi1Psi0_KernRegr_v1.3.1_Aug12-2011.txt";
+
+    /** the file containing the backbone-dependent Ramachandran data */
+    public static final String RAMACHANDRAN_DATA_FILENAME = "ramachandran/NDRD_TCB.txt.gz";
 }

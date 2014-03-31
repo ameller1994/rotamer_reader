@@ -24,27 +24,29 @@ import com.google.common.collect.*;
 public enum AminoAcid
 {
     // enum constants
-    ALA("Ala",      "alanine",       RotamerType.HAS_NO_ROTAMERS),
-    GLY("Gly",      "glycine",       RotamerType.HAS_NO_ROTAMERS),
-    VAL("Val",      "valine",        RotamerType.IS_ROTAMERIC),
-    LEU("Leu",      "leucine",       RotamerType.IS_ROTAMERIC),
-    ILE("Ile",      "isoleucine",    RotamerType.IS_ROTAMERIC),
-    CPR("Cpr",      "cis-proline",   RotamerType.IS_ROTAMERIC),
-    TPR("Tpr",      "trans-proline", RotamerType.IS_ROTAMERIC),
-    PHE("Phe",      "phenylalanine", RotamerType.NON_ROTAMERIC),
-    TYR("Tyr",      "tyrosine",      RotamerType.NON_ROTAMERIC),
-    TRP("Trp",      "tryptophan",    RotamerType.NON_ROTAMERIC),
-    SER("Ser",      "serine",        RotamerType.IS_ROTAMERIC),
-    THR("Thr",      "threonine",     RotamerType.IS_ROTAMERIC),
-    CYS("Cys",      "cysteine",      RotamerType.IS_ROTAMERIC),
-    MET("Met",      "methionine",    RotamerType.IS_ROTAMERIC),
-    ASN("Asn",      "aspargine",     RotamerType.NON_ROTAMERIC),
-    GLN("Gln",      "glutamine",     RotamerType.NON_ROTAMERIC),
-    LYS("Lys",      "lysine",        RotamerType.IS_ROTAMERIC),
-    ARG("Arg",      "arginine",      RotamerType.NON_ROTAMERIC),
-    HIS("His",      "histidine",     RotamerType.NON_ROTAMERIC),
-    ASP("Asp",      "aspartate",     RotamerType.NON_ROTAMERIC),
-    GLU("Glu",      "glutamate",     RotamerType.NON_ROTAMERIC);
+    ALA("Ala",      "alanine",         RotamerType.HAS_NO_ROTAMERS),
+    GLY("Gly",      "glycine",         RotamerType.HAS_NO_ROTAMERS),
+    VAL("Val",      "valine",          RotamerType.IS_ROTAMERIC),
+    LEU("Leu",      "leucine",         RotamerType.IS_ROTAMERIC),
+    ILE("Ile",      "isoleucine",      RotamerType.IS_ROTAMERIC),
+    //PRO("Pro",      "proline",         RotamerType.SPECIAL),
+    CPR("Cpr",      "cis-proline",     RotamerType.IS_ROTAMERIC),
+    TPR("Tpr",      "trans-proline",   RotamerType.IS_ROTAMERIC),
+    PHE("Phe",      "phenylalanine",   RotamerType.NON_ROTAMERIC),
+    TYR("Tyr",      "tyrosine",        RotamerType.NON_ROTAMERIC),
+    TRP("Trp",      "tryptophan",      RotamerType.NON_ROTAMERIC),
+    SER("Ser",      "serine",          RotamerType.IS_ROTAMERIC),
+    THR("Thr",      "threonine",       RotamerType.IS_ROTAMERIC),
+    CYS("Cys",      "cysteine",        RotamerType.IS_ROTAMERIC),
+    MET("Met",      "methionine",      RotamerType.IS_ROTAMERIC),
+    ASN("Asn",      "aspargine",       RotamerType.NON_ROTAMERIC),
+    GLN("Gln",      "glutamine",       RotamerType.NON_ROTAMERIC),
+    LYS("Lys",      "lysine",          RotamerType.IS_ROTAMERIC),
+    ARG("Arg",      "arginine",        RotamerType.IS_ROTAMERIC),
+    HIS("His",      "histidine",       RotamerType.NON_ROTAMERIC),
+    ASP("Asp",      "aspartate",       RotamerType.NON_ROTAMERIC),
+    GLU("Glu",      "glutamate",       RotamerType.NON_ROTAMERIC),
+    ALL("All",      "all amino acids", RotamerType.SPECIAL);
 
     // fields
 
@@ -85,7 +87,7 @@ public enum AminoAcid
             filename = Settings.ROTAMER_LIBRARY_DIRECTORY + shortName.toLowerCase() + ".bbdep.rotamers.lib";
         else if ( rotamerType == RotamerType.NON_ROTAMERIC )
             filename = Settings.ROTAMER_LIBRARY_DIRECTORY + shortName.toLowerCase() + ".bbdep.densities.lib";
-        else if ( rotamerType == RotamerType.HAS_NO_ROTAMERS )
+        else if ( rotamerType == RotamerType.HAS_NO_ROTAMERS || rotamerType == RotamerType.SPECIAL )
             filename = "";
         else
             throw new IllegalArgumentException("Unrecognized RotamerType in AminoAcid constructor!");
@@ -134,7 +136,12 @@ public enum AminoAcid
         /**
          * Represents an amino acid that does not have sidechain torsions.
          */
-        HAS_NO_ROTAMERS;
+        HAS_NO_ROTAMERS,
+
+        /**
+         * Represents ALL of the amino acids for the Ramachandran library.
+         */
+        SPECIAL;
     }
 
     /**

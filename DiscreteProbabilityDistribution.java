@@ -167,13 +167,45 @@ public class DiscreteProbabilityDistribution<E>
         for (int i=0; i < probability.length; i++)
             {
                 E outcome = outcomes.get(i);
-                //double prob = probability[i];
                 double prob = inputProbabilities.get(i);
-                returnString = returnString + String.format("[%s, %.2f]", outcome.toString(), 100.0 * prob);
+                returnString = returnString + String.format("{outcome: %s, prob%% = %.2f}", outcome.toString(), 100.0 * prob);
                 if ( i < probability.length - 1 )
                     returnString = returnString + "\n";
             }
         return returnString;
+    }
+
+    /**
+     * Returns up to maxNumberOfLines probabilities above some threshold for debugging.
+     * The biggest probabilities are returned first.
+     *
+     * @param threshold the minimum probability to print
+     * @param maxNumberOfLines how many lines to print
+     * @return the brief debug string
+     */
+    public String toDebugString(double threshold, int maxNumberOfLines)
+    {
+        TreeMap<Double,String> map = new TreeMap<>(Collections.reverseOrder());
+        for (int i=0; i < probability.length; i++)
+            {
+                E outcome = outcomes.get(i);
+                double prob = inputProbabilities.get(i);
+                if ( prob < threshold )
+                    continue;
+                map.put(100.0 * prob, outcome.toString());
+            }
+
+        int count = 0;
+        String returnString = "[ ";
+        for (Double prob : map.keySet())
+            {
+                count++;
+                if ( count > maxNumberOfLines )
+                    break;
+                String outcome = map.get(prob);
+                returnString = returnString + String.format("{outcome: %s, prob%% = %.6f}\n", outcome, prob);
+            }
+        return returnString + " ]";
     }
 
     /**
