@@ -143,8 +143,21 @@ public enum AminoAcid
      * @param phi the backbone angle
      * @return the torsion angles X1, X2, ... as an ordered list in degrees
      */
-    public List<Double> getRandomRotamer(Double psi, Double phi)
+    public List<Double> getRandomRotamer(Double phi, Double psi)
     {
+	if (rotamerType == RotamerType.HAS_NO_ROTAMERS)
+	    throw new IllegalArgumentExcpetion("Non rotameric amino acid");
+	else if (rotamerType == RotamerType.IS_ROTAMERIC) {
+	    RotamericLibrary rotLib = new RotamericLibrary(this);
+	    DiscreteProbabilityDistribution<List<Double>> dpd = rotLib.get(phi,psi);
+	    return dpd.getRandom();
+	}
+	else if (rotamerType == RotamerType.NON_ROTAMERIC) {
+	    NonRotamericLibrary nRotLib = new NonRotamericLibrary(this);
+	    DiscreteProbabilityDistribution<NonRotamericLibrary.NonRotamericAngles> dpd1 = nRotLib.get(phi,psi);
+	    NonRotamericLibrary.NonRotamericAngles nrA = dpd1.getRandom();
+	    Double lastChi = nrA.getDiscreteProbabilityDistribution().getRandom();
+	    
 	    return new LinkedList<Double>();
 	}
 					  
