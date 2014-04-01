@@ -150,6 +150,7 @@ public enum AminoAcid
      * @param phi the backbone angle
      * @return the torsion angles X1, X2, ... as an ordered list in degrees
      */
+    /*
     public List<Double> getRandomRotamer(Double phi, Double psi)
     {
 	if (rotamerType == RotamerType.HAS_NO_ROTAMERS)
@@ -167,11 +168,47 @@ public enum AminoAcid
 	    
 	    return new LinkedList<Double>();
 	}
-					  
+    */
+
+    public RotamerType getRotamerType() {
+	return rotamerType;
+    }
+
+    public static int getTotalRotamers() {
+	int rotamerCount = 0;
+	for (AminoAcid aa : AminoAcid.values()) {
+	    if (aa.getRotamerType() == RotamerType.IS_ROTAMERIC) {
+		RotamericLibrary rotLib = new RotamericLibrary(aa);
+		for (Double phi = -180.0; phi <= 180.0; phi = phi + 10.0) {
+		    for (Double psi = -180.0; psi <= 180.0; psi = psi + 10.0) {
+			System.out.println(psi);
+			System.out.println(phi);
+			DiscreteProbabilityDistribution<List<Double>> dpd = rotLib.get(phi,psi);
+			rotamerCount = rotamerCount + dpd.getSize();
+		    }
+		}
+	    }
+	    else if (aa.getRotamerType() == RotamerType.NON_ROTAMERIC) {
+		NonRotamericLibrary rotLib = new NonRotamericLibrary(aa);
+		for (Double phi = -180.0; phi <= 180.0; phi = phi + 10.0) { 
+		    for (Double psi = -180.0;psi <= 180.0 ; psi = psi + 10.0) {
+			System.out.println(phi);
+			System.out.println(psi);
+			DiscreteProbabilityDistribution<NonRotamericLibrary.NonRotamericAngles> dpd = rotLib.get(phi,psi);
+			rotamerCount = rotamerCount + dpd.getSize();
+		    }
+		}
+	    }
+	
+	}
+	return rotamerCount;
+    }
+
     // for testing
     public static void main(String[] args)
     {
-        System.out.println("hello");
+        System.out.println(AminoAcid.getTotalRotamers());
+
 	    //System.out.println(AminoAcid.getRotamer(AminoAcid.Gln, 120.0, 120.0));
     }
 }

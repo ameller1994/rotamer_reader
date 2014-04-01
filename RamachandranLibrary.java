@@ -480,14 +480,16 @@ public class RamachandranLibrary
         //System.out.println(getLeftDistribution(AminoAcid.ALA, AminoAcid.ALL));
         //System.out.println(getRightDistribution(AminoAcid.ALA, AminoAcid.ALL));
 
-        System.out.println(getTripletDistribution(AminoAcid.ILE, AminoAcid.GLY, AminoAcid.MET).toDebugString(0.0001,10));
-        System.out.println(getTripletDistribution(AminoAcid.LEU, AminoAcid.GLY, AminoAcid.MET).toDebugString(0.0001,10));
+	System.out.println(locate(AminoAcid.VAL,Direction.RIGHT,AminoAcid.VAL));
+
+        //System.out.println(getTripletDistribution(AminoAcid.ILE, AminoAcid.GLY, AminoAcid.MET).toDebugString(0.0001,10));
+        //System.out.println(getTripletDistribution(AminoAcid.LEU, AminoAcid.GLY, AminoAcid.MET).toDebugString(0.0001,10));
         
-        System.out.println(getTripletDistribution(AminoAcid.TYR, AminoAcid.ARG, AminoAcid.TRP).toDebugString(0.0001,10));
-        System.out.println(getTripletDistribution(AminoAcid.PHE, AminoAcid.ARG, AminoAcid.TRP).toDebugString(0.0001,10));
+        //System.out.println(getTripletDistribution(AminoAcid.TYR, AminoAcid.ARG, AminoAcid.TRP).toDebugString(0.0001,10));
+        //System.out.println(getTripletDistribution(AminoAcid.PHE, AminoAcid.ARG, AminoAcid.TRP).toDebugString(0.0001,10));
         
-        System.out.println(getTripletDistribution(AminoAcid.ASN, AminoAcid.TPR, AminoAcid.SER).toDebugString(0.0001,10));
-        System.out.println(getTripletDistribution(AminoAcid.ASN, AminoAcid.TPR, AminoAcid.THR).toDebugString(0.0001,10));
+        //System.out.println(getTripletDistribution(AminoAcid.ASN, AminoAcid.TPR, AminoAcid.SER).toDebugString(0.0001,10));
+        //System.out.println(getTripletDistribution(AminoAcid.ASN, AminoAcid.TPR, AminoAcid.THR).toDebugString(0.0001,10));
         Scanner scanner = new Scanner(System.in);
         System.out.println("Press enter to continue.");
         scanner.nextLine();

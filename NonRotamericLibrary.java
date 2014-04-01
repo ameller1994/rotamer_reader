@@ -173,7 +173,7 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
                                 //System.out.println( nonRotamericChiFieldNumbers.size() + " / " + nonRotamericChiLabels.size() );
                                 continue;
                             }
-			            else if (!parts[0].equals(aminoAcid.toString().toUpperCase()))
+			else if (!parts[0].equals(aminoAcid.toString().toUpperCase()))
                             continue;
 
                         // ignore low-probability rotamers
@@ -227,7 +227,7 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
                         // reset for next round
                         lastPhi = currPhi;
                         lastPsi = currPsi;
-		            }
+		    }
 
                 // edge case: store last block of data
             }
@@ -265,7 +265,12 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
         DiscreteProbabilityDistribution<NonRotamericAngles> dpd = dataset.get(new SideChainRotamerLibrary.BackboneAngles(phi_rounded,psi_rounded));
         
         if ( dpd == null )
-            throw new NullPointerException("data not found!");
+	    {
+		System.out.println("phi_rounded is " + phi_rounded);
+		System.out.println("psi_rounded is " + psi_rounded);
+		System.out.println(aminoAcid);
+		throw new NullPointerException("data not found!");
+	    }
         return dpd;
     }
 

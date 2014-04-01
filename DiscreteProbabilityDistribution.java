@@ -243,6 +243,11 @@ public class DiscreteProbabilityDistribution<E>
         return true;
     }
 
+    public int getSize() 
+    {
+	return outcomes.size();
+    }
+
     /**
      * Tester class.
      */
