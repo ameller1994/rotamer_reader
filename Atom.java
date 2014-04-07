@@ -28,6 +28,7 @@ public class Atom
         this.position = new Vector3D(x,y,z);
         setVDW();
         formalCharge = 0;
+	partialCharge = 0.0;
     }
 
     public Atom(String symbol, Vector3D position)
@@ -36,8 +37,12 @@ public class Atom
         this.position = position;
         setVDW();
         formalCharge = 0;
+	partialCharge = 0.0;
     }
 
+    /**
+       @return string representation of atom
+    */
     public String toString()
     {
         //return(symbol);
@@ -50,11 +55,17 @@ public class Atom
         this.symbol = symbol;
     }
 
+    /**
+       @return string with the atom symbol (C, N, O, etc.) 
+    */
     public String getSymbol()
     {
         return(symbol);
     }
 
+    /**
+       allows user to change the position of an atom
+    */
     public void setPosition(double x, double y, double z)
     {
         this.position = new Vector3D(x,y,z);
@@ -74,9 +85,12 @@ public class Atom
     {
         Atom newAtom = new Atom(symbol, position);
         newAtom.setFormalCharge( formalCharge );
+	newAtom.setPartialCharge( partialCharge );
         return(newAtom);
     }
 
+    /** sets default Van Der Waals values for the atom 
+     */
     private void setVDW()
     {
         if (symbol.equals("H"))
@@ -130,6 +144,16 @@ public class Atom
     public int getFormalCharge()
     {
 	return formalCharge;
+    }
+    
+    public double getPartialCharge()
+    {
+	return partialCharge;
+    }
+
+    public void setPartialCharge(double partialCharge) 
+    {
+	this.partialCharge = partialCharge;
     }
 
     public void setFormalCharge(int formalCharge)
