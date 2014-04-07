@@ -230,6 +230,13 @@ public class NonRotamericLibrary extends SideChainRotamerLibrary
 		    }
 
                 // edge case: store last block of data
+		SideChainRotamerLibrary.BackboneAngles bba = new SideChainRotamerLibrary.BackboneAngles(lastPhi,lastPsi);
+
+		// create the distribution that stores entries for this entire block
+		DiscreteProbabilityDistribution<NonRotamericAngles> outerDPD = new DiscreteProbabilityDistribution<>(tempNRA,tempProbabilities);
+		dataset.put(bba, outerDPD);
+	       
+
             }
         catch (IOException e)
             {

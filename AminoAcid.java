@@ -181,8 +181,6 @@ public enum AminoAcid
 		RotamericLibrary rotLib = new RotamericLibrary(aa);
 		for (Double phi = -180.0; phi <= 180.0; phi = phi + 10.0) {
 		    for (Double psi = -180.0; psi <= 180.0; psi = psi + 10.0) {
-			System.out.println(psi);
-			System.out.println(phi);
 			DiscreteProbabilityDistribution<List<Double>> dpd = rotLib.get(phi,psi);
 			rotamerCount = rotamerCount + dpd.getSize();
 		    }
@@ -192,8 +190,6 @@ public enum AminoAcid
 		NonRotamericLibrary rotLib = new NonRotamericLibrary(aa);
 		for (Double phi = -180.0; phi <= 180.0; phi = phi + 10.0) { 
 		    for (Double psi = -180.0;psi <= 180.0 ; psi = psi + 10.0) {
-			System.out.println(phi);
-			System.out.println(psi);
 			DiscreteProbabilityDistribution<NonRotamericLibrary.NonRotamericAngles> dpd = rotLib.get(phi,psi);
 			rotamerCount = rotamerCount + dpd.getSize();
 		    }
