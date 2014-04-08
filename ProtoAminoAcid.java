@@ -35,7 +35,7 @@ public class ProtoAminoAcid {
     }
 
     /** A simple weighted graph which represents bonds between atoms */
-    SimpleWeightedGraph<Atom, DefaultWeightedEdges> bonds;
+    SimpleWeightedGraph<Atom, DefaultWeightedEdge> bonds;
     
     /**
        A list of the atoms that are not sticky in the prototypical amino acid
@@ -51,12 +51,23 @@ public class ProtoAminoAcid {
     public ProtoAminoAcid(AminoAcid aminoAcid, Position position) {
 
 	Scanner thisFile = null;
+	List<Atom> allAtoms = new ArrayList<>();
+	bonds = new SimpleWeightedGraph<Atom, DefaultWeightedEdge>(DefaultWeightedEdge.class);
+
 	try
 	    {
 		thisFile = new Scanner(new FileReader("aa_library/" + aminoAcid.toString().toLowerCase()+"_"+position.toString()+"-out"));
 
 		int delimeterCount = 0;
 		int totalAtoms = 0;
+		int totalBondsDoubled = 0;
+
+		int atomsEnteredCount = 0;
+		int bondsEnteredCount = 0;
+
+		//booleans to indicate if it is time to read atoms or bonds
+		boolean enter_atoms = false;
+		boolean enter_bonds = false;
 
 		while (thisFile.hasNextLine())
 		    {
@@ -66,10 +77,19 @@ public class ProtoAminoAcid {
 			if (currentLine.indexOf("m_atom[") >= 0)
 			    {
 				String[] parts = currentLine.split("\\s+");
-				System.out.println(parts[1].substring(7,parts[1].length()-1));
 				totalAtoms = Integer.parseInt(parts[1].substring(7,parts[1].length()-1));
+				enter_atoms = true;
+				
 			    }
 		       
+			if (currentLine.indexOf("m_bond[") >= 0) 
+			    {
+				String[] parts = currentLine.split("\\s+");
+				totalBondsDoubled = Integer.parseInt(parts[1].substring(7,parts[1].length()-1));
+				enter_bonds = true;
+
+			    }
+
 			if (currentLine.indexOf(":::") < 0 && delimeterCount < 5) 
 			    {
 				continue;
@@ -79,10 +99,13 @@ public class ProtoAminoAcid {
 				delimeterCount++;
 				continue;
 			    }
-		      
+			//skips lines after "m_bond[]" and before ::: which specifies data entry
+			else if (delimeterCount < 7 && enter_bonds)
+			    {
+				continue;
+			    }
 
-	
-			for(int i=0; i< totalAtoms; i++) {
+			if (enter_atoms) {
 			    
 			    // parse currentLine to access data fields
 			    String processedLine = currentLine.replaceAll("\"","");
@@ -90,12 +113,39 @@ public class ProtoAminoAcid {
 			    
 			    String atomName = parts[14].substring(0,1);
 			    Atom atom = new Atom(atomName, new Vector3D(Double.parseDouble(parts[3]),Double.parseDouble(parts[4]),Double.parseDouble(parts[5])));
+			    allAtoms.add(atom);
+			    bonds.addVertex(atom);
+	    
+			    atomsEnteredCount++;
 			    
-			    System.out.println(parts[3]);
-			    System.out.println(parts[14]);
-			    
-			    currentLine = thisFile.nextLine();
+			    if (atomsEnteredCount == totalAtoms)
+				enter_atoms = false;
+
 			}
+
+			if (enter_bonds) {
+			    DefaultWeightedEdge thisEdge = null;
+			    // parse currentLine to access data fields
+			    String processedLine = currentLine.replaceAll("\"","");
+			    String[] parts = processedLine.split("\\s+");
+			   			   		    
+			    int atomIndex1 = Integer.parseInt(parts[2]) - 1;
+			    int atomIndex2 = Integer.parseInt(parts[3]) - 1;
+			    
+			    if (bonds.getEdge(allAtoms.get(atomIndex1),allAtoms.get(atomIndex2))== null)
+				{
+				    thisEdge = bonds.addEdge(allAtoms.get(atomIndex1), allAtoms.get(atomIndex2));
+				    Double bondOrder = Double.parseDouble(parts[4]);
+				    bonds.setEdgeWeight(thisEdge, bondOrder);
+				}
+			    
+			    bondsEnteredCount++;
+			    
+			    if (bondsEnteredCount == totalBondsDoubled)
+				enter_bonds = false;
+			}
+			
+			
 		    }
 	    }
 	catch (IOException e)
@@ -108,6 +158,8 @@ public class ProtoAminoAcid {
                 if (thisFile != null)
                     thisFile.close();
             }
+	System.out.println(bonds.toString());
+	System.out.println(allAtoms.toString());
 
     }
 
