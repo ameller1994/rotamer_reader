@@ -147,6 +147,60 @@ public class ProtoAminoAcid {
 			
 			
 		    }
+		
+		thisFile = new Scanner(new FileReader("aa_library/" + aminoAcid.toString().toLowerCase()+"_"+position.toString()+"_opls.txt"));
+		
+		boolean atData = false;
+		boolean getAtomData = false;
+		int linesPastForceFieldHeader = 0;
+		final int LINESTOIGNOREAFTERHEADER = 4;
+		boolean ignoreFourLines = true;
+		
+		int atomIndex = 0;
+		atomsEnteredCount = 0;
+
+		while(thisFile.hasNextLine()) 
+		    {
+			String currentLine = thisFile.nextLine();
+			if (!atData && currentLine.indexOf("OPLSAA FORCE FIELD TYPE ASSIGNED") < 0)
+			    continue;
+			else
+			    {
+				atData = true;
+				
+				if (ignoreFourLines) {
+				    for( int lines = 0; lines < LINESTOIGNOREAFTERHEADER; lines++)
+					{
+					    currentLine = thisFile.nextLine();
+					}
+				    ignoreFourLines = false;
+				    getAtomData = true;
+				}
+			    }
+
+			
+
+			if (getAtomData) 
+			    {
+				System.out.println(currentLine);
+
+				String[] parts = currentLine.split("\\s+");
+				System.out.println(parts[5]);
+				System.out.println(parts[7]);
+				
+				Atom currentAtom = allAtoms.get(atomIndex);
+				currentAtom.setPartialCharge(Double.parseDouble(parts[5]));
+				currentAtom.setSigma(Double.parseDouble(parts[6]));
+				currentAtom.setEpsilon(Double.parseDouble(parts[7]));
+				
+				atomsEnteredCount++;
+				if (atomsEnteredCount == totalAtoms)
+				    getAtomData = false;
+
+				
+
+			    }
+		    }
 	    }
 	catch (IOException e)
             {

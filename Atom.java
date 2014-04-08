@@ -135,6 +135,16 @@ public class Atom
     {
 	return sigma;
     }
+    
+    public void setSigma(Double sigma) 
+    {
+	this.sigma = sigma;
+    }
+    
+    public void setEpsilon(Double epsilon)
+    {
+	this.epsilon = epsilon;
+    }
 
     public double getEpsilon()
     {
