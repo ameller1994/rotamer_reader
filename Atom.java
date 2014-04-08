@@ -1,4 +1,4 @@
-import org.apache.commons.math.geometry.*;
+import org.apache.commons.math3.geometry.euclidean.threed.*;
 
 /** A class representing an atom. It includes information about the symbol, the position, and the VDW parameters for an atom.
  */
