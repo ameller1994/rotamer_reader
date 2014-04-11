@@ -26,7 +26,7 @@ public class ProtoAminoAcid {
 		{
 		case N_TERMINAL : return "nterm";
 		case C_TERMINAL : return "cterm";
-		default : return "middle";
+		default : return "center";
 		}
 	    
 	}
@@ -218,7 +218,7 @@ public class ProtoAminoAcid {
     }
 
     public static void main(String[] args) {
-	ProtoAminoAcid test = new ProtoAminoAcid(AminoAcid.ALA, Position.N_TERMINAL);
+	ProtoAminoAcid test = new ProtoAminoAcid(AminoAcid.ASP, Position.CHAIN);
 	
     }
 }
