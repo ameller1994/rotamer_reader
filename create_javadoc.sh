@@ -1,1 +1,1 @@
-javadoc *.java -classpath '.;lib/*' -d javadoc
+javadoc *.java -classpath '.;lib/*' -d javadoc -private
